@@ -313,7 +313,13 @@
 
             <p style="text-align: center; margin: 1rem 0;">Atau masukkan ID manual:</p>
             <input type="text" id="join-id-input" placeholder="Contoh: 4821" maxlength="6">
-            <button class="btn" onclick="joinRoom()">Sambungkan</button>
+            <button id="btn-join" class="btn" onclick="joinRoom()">Sambungkan</button>
+
+            <!-- Loading Indicator -->
+            <div id="join-loading" style="display: none; text-align: center; margin: 1rem 0;">
+                <div class="spinner" style="margin: 1rem auto;"></div>
+                <p style="color: var(--text-light); font-size: 0.9rem;">Menyambungkan ke room...</p>
+            </div>
 
             <button class="btn secondary" onclick="resetApp()">Kembali</button>
         </div>
@@ -384,9 +390,13 @@
         function initHost() {
             // UI Loading State
             showStep('step-host');
+
+            // 1. Show ID Immediately
+            myId = generateId();
+            document.getElementById('my-id-display').textContent = myId;
+
             const qrEl = document.getElementById('qrcode');
-            qrEl.innerHTML = '<div class="spinner"></div><p style="text-align:center; font-size:0.9rem; color:var(--text-light)">Sedang membuat room...</p>';
-            document.getElementById('my-id-display').innerHTML = '<span style="color:var(--text-light); font-size:1rem;">Generating ID...</span>';
+            qrEl.innerHTML = '<div class="spinner"></div><p style="text-align:center; font-size:0.9rem; color:var(--text-light)">Menghubungkan ke server...</p>';
 
             try {
                 if (typeof Peer === 'undefined') {
@@ -394,8 +404,7 @@
                     return;
                 }
 
-                myId = generateId();
-
+                // myId is already generated above
                 peer = new Peer(myId, { debug: 1 });
 
                 peer.on('open', (id) => {
@@ -492,22 +501,40 @@
             const targetId = document.getElementById('join-id-input').value.trim();
             if (!targetId) return;
 
+            // Show loading indicator
+            document.getElementById('btn-join').style.display = 'none';
+            document.getElementById('join-loading').style.display = 'block';
+
             peer = new Peer({ debug: 1 });
 
             peer.on('open', () => {
                 conn = peer.connect(targetId);
-                conn.on('open', setupConnection);
+                conn.on('open', () => {
+                    document.getElementById('join-loading').style.display = 'none';
+                    setupConnection();
+                });
                 conn.on('error', (err) => {
+                    document.getElementById('btn-join').style.display = 'block';
+                    document.getElementById('join-loading').style.display = 'none';
                     alert("Gagal konek: " + err);
                     resetApp();
                 });
 
+                // Timeout if connection takes too long
                 setTimeout(() => {
-                    if (!conn.open) { /* connecting... */ }
-                }, 1000);
+                    if (!conn.open) {
+                        document.getElementById('btn-join').style.display = 'block';
+                        document.getElementById('join-loading').style.display = 'none';
+                        alert("Koneksi timeout. Pastikan ID room benar.");
+                    }
+                }, 10000);
             });
 
-            peer.on('error', err => alert('Peer Error: ' + err));
+            peer.on('error', err => {
+                document.getElementById('btn-join').style.display = 'block';
+                document.getElementById('join-loading').style.display = 'none';
+                alert('Peer Error: ' + err);
+            });
         }
 
         // --- Common Connection Logic ---
@@ -562,11 +589,19 @@
         function sendSingleFile(file) {
             log(`Mengirim file: ${file.name}...`, 'system');
 
-            // Show preview if image
+            const url = URL.createObjectURL(file);
+            let displayContent = `📤 <b>${file.name}</b> (${formatBytes(file.size)})`;
+
+            // Detect Image or Video
             if (file.type.startsWith('image/')) {
-                const url = URL.createObjectURL(file);
-                log(`<img src="${url}" class="img-preview" alt="Dikirim">`, 'me');
+                displayContent += `<br><img src="${url}" class="img-preview" alt="Dikirim">`;
+            } else if (file.type.startsWith('video/')) {
+                displayContent += `<br><video src="${url}" controls class="img-preview"></video>`;
+            } else {
+                displayContent += `<br><a href="${url}" target="_blank" style="font-size:0.9rem; text-decoration:underline;">Lihat File</a>`;
             }
+
+            log(displayContent, 'me');
 
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -599,6 +634,8 @@
 
             if (data.fileType && data.fileType.startsWith('image/')) {
                 displayContent += `<br><img src="${url}" class="img-preview" alt="Diterima" onclick="window.open('${url}')">`;
+            } else if (data.fileType && data.fileType.startsWith('video/')) {
+                displayContent += `<br><video src="${url}" controls class="img-preview"></video>`;
             }
 
             log(displayContent, 'peer');
