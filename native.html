@@ -5,263 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirim Data (Offline Mode)</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #334155;
-            --border: #e2e8f0;
-            --success: #10b981;
-        }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            background: var(--card);
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 550px;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        h1 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
-        }
-
-        .subtitle {
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-bottom: 2rem;
-        }
-
-        .step {
-            display: none;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            width: 100%;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-        }
-
-        .btn.secondary {
-            background-color: white;
-            color: var(--text);
-            border: 2px solid var(--border);
-        }
-
-        .btn.download {
-            background-color: #0f172a;
-        }
-
-        .btn.text-link {
-            background: none;
-            border: none;
-            color: var(--primary);
-            text-decoration: underline;
-            font-size: 0.9rem;
-            padding: 0;
-            width: auto;
-            margin: 10px auto;
-            display: block;
-        }
-
-        /* Drop Zone */
-        .drop-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 2rem;
-            margin: 1rem 0;
-            transition: all 0.2s;
-            cursor: pointer;
-            background: #f1f5f9;
-        }
-
-        .drop-zone.highlight {
-            border-color: var(--primary);
-            background: #eff6ff;
-        }
-
-        .drop-zone p {
-            margin: 0;
-            pointer-events: none;
-        }
-
-        .icon-large {
-            font-size: 2rem;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        /* Manual Text Area (Hidden by default) */
-        .manual-area {
-            display: none;
-            margin-top: 1rem;
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-            text-align: left;
-        }
-
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            resize: vertical;
-            box-sizing: border-box;
-        }
-
-        /* Chat UI */
-        .chat-container {
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: #fff;
-            position: relative;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            background: #f8fafc;
-        }
-
-        .msg {
-            padding: 8px 12px;
-            border-radius: 12px;
-            max-width: 80%;
-            font-size: 0.9rem;
-            word-break: break-word;
-        }
-
-        .msg.me {
-            background: var(--primary);
-            color: white;
-            align-self: flex-end;
-        }
-
-        .msg.peer {
-            background: #e2e8f0;
-            align-self: flex-start;
-        }
-
-        .msg.system {
-            align-self: center;
-            font-size: 0.75rem;
-            color: #94a3b8;
-            background: transparent;
-        }
-
-        .chat-input {
-            display: flex;
-            padding: 10px;
-            border-top: 1px solid var(--border);
-            background: #fff;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-right: 8px;
-            outline: none;
-        }
-
-        .chat-input input:focus {
-            border-color: var(--primary);
-        }
-
-        /* Drag Overlay */
-        .chat-container.drag-active::after {
-            content: "Lepaskan file di sini...";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(37, 99, 235, 0.1);
-            border: 3px dashed var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--primary);
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        /* Hidden Input */
-        input[type="file"] {
-            display: none;
-        }
-    </style>
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="css/native.css">
 </head>
 
 <body>
-
-    <div class="container">
+    <div class="container" style="text-align: center;">
         <h1>📡 Kirim Data Offline</h1>
         <p class="subtitle">Tanpa Internet, Tanpa Server. Tukar File atau Copy-Paste.</p>
 
@@ -271,7 +23,7 @@
             <button class="btn secondary" onclick="startJoiner()"><span>📥 Saya Penerima (Joiner)</span></button>
         </div>
 
-        <!-- HOST STEP 1: DOWNLOAD TIKET UNDANGAN -->
+        <!-- HOST STEP 1: LOADING -->
         <div id="host-step-1" class="step">
             <p>1. Sistem sedang membuat Tiket...</p>
             <div class="drop-zone" style="border:none; background:transparent;">
@@ -279,6 +31,7 @@
             </div>
         </div>
 
+        <!-- HOST STEP 2: DOWNLOAD & UPLOAD TICKET -->
         <div id="host-step-2" class="step">
             <h3>Langkah 1 dari 2</h3>
             <p><b>Opsi A:</b> Download file Tiket & kirim ke teman.</p>
@@ -308,7 +61,7 @@
             </div>
         </div>
 
-        <!-- JOINER STEP 1: UPLOAD TIKET UNDANGAN -->
+        <!-- JOINER STEP 1: UPLOAD TICKET -->
         <div id="joiner-step-1" class="step">
             <h3>Langkah 1 dari 2</h3>
             <p>Minta Tiket Undangan dari Host.</p>
@@ -327,7 +80,7 @@
             </div>
         </div>
 
-        <!-- JOINER STEP 2: DOWNLOAD TIKET BALASAN -->
+        <!-- JOINER STEP 2: DOWNLOAD ANSWER -->
         <div id="joiner-step-2" class="step">
             <h3>Langkah 2 dari 2</h3>
             <p>Tiket Balasan siap! Kirim kembali ke Host.</p>
@@ -366,226 +119,15 @@
                 <button class="btn secondary" style="border-color: #ef4444; color: #ef4444;"
                     onclick="resetApp()">Keluar</button>
             </div>
-            <input type="file" id="fileTransferInput" onchange="sendFileTransferManual()">
+            <input type="file" id="fileTransferInput" multiple onchange="sendFileTransferManual()">
         </div>
-
     </div>
 
-    <script>
-        let pc, dc;
-        let localTicket = null;
-        let incomingFiles = {};
-        const MAX_CHUNK = 16 * 1024;
-
-        const config = { iceServers: [] };
-
-        // --- UTILS ---
-        function show(id) { document.querySelectorAll('.step').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-        function triggerUpload(id) { document.getElementById(id).click(); }
-        function resetApp() { if (confirm("Yakin ingin keluar?")) window.location.reload(); }
-        function autoScroll() { const box = document.getElementById('msgs'); box.scrollTop = box.scrollHeight; }
-
-        function toggleManual(id) {
-            const el = document.getElementById(id);
-            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-        }
-
-        function downloadTicket(type) {
-            if (!localTicket) return alert("Tiket belum siap!");
-            const blob = new Blob([JSON.stringify(localTicket)], { type: "application/json" });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = type === 'offer' ? 'tiket-undangan.json' : 'tiket-balasan.json';
-            link.click();
-        }
-
-        function setManualText(id, data) {
-            // Compress text to Base64 for easier copy-paste
-            const str = JSON.stringify(data);
-            const encoded = btoa(str);
-            document.getElementById(id).value = encoded;
-        }
-
-        async function waitForIce() {
-            if (pc.iceGatheringState === 'complete') return;
-            return new Promise(r => {
-                pc.onicegatheringstatechange = () => { if (pc.iceGatheringState === 'complete') r(); };
-            });
-        }
-
-        // --- CORE LOGIC ---
-        async function startHost() {
-            pc = new RTCPeerConnection(config);
-            dc = pc.createDataChannel("chat");
-            setupDC(dc);
-            show('host-step-1');
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            await waitForIce();
-
-            localTicket = pc.localDescription;
-            setManualText('host-offer-text', localTicket);
-            show('host-step-2');
-        }
-
-        async function startJoiner() {
-            pc = new RTCPeerConnection(config);
-            pc.ondatachannel = e => setupDC(e.channel);
-            show('joiner-step-1');
-        }
-
-        // --- HANDLERS (Manual & File) ---
-        async function processTicket(ticket, type) {
-            try {
-                if (type === 'offer') {
-                    await pc.setRemoteDescription(ticket);
-                    const answer = await pc.createAnswer();
-                    await pc.setLocalDescription(answer);
-                    await waitForIce();
-
-                    localTicket = pc.localDescription;
-                    setManualText('join-answer-text', localTicket);
-                    show('joiner-step-2');
-                } else {
-                    await pc.setRemoteDescription(ticket);
-                }
-            } catch (err) {
-                alert("Kode/File Tiket Rusak atau Salah!");
-                console.error(err);
-            }
-        }
-
-        async function handleFileUpload(input, type) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => processTicket(JSON.parse(e.target.result), type);
-            reader.readAsText(file);
-        }
-
-        async function handleManualText(type, inputId) {
-            const raw = document.getElementById(inputId).value.trim();
-            if (!raw) return alert("Tempel kode dulu!");
-            try {
-                const decoded = atob(raw); // Decode Base64
-                const ticket = JSON.parse(decoded);
-                await processTicket(ticket, type);
-            } catch (e) {
-                alert("Kode tidak valid! Pastikan menyalin semua karakter.");
-            }
-        }
-
-        // --- CHAT & FILE TRANSFER ---
-        function setupDC(channel) {
-            dc = channel;
-            dc.onopen = () => { show('step-chat'); setupDragDrop(); };
-            dc.onmessage = e => {
-                const data = e.data;
-                if (typeof data === 'string') {
-                    try {
-                        const msg = JSON.parse(data);
-                        if (msg.type === 'meta') {
-                            incomingFiles[msg.data.id] = { meta: msg.data, buffer: [], received: 0 };
-                            incomingFiles.currentId = msg.data.id;
-                            log(`⬇️ Menerima: ${msg.data.name}...`, 'system');
-                        } else { log(data, 'peer'); }
-                    } catch (err) { log(data, 'peer'); }
-                } else {
-                    const currentId = incomingFiles.currentId;
-                    if (currentId && incomingFiles[currentId]) {
-                        const task = incomingFiles[currentId];
-                        task.buffer.push(data);
-                        task.received += data.byteLength;
-                        if (task.received >= task.meta.size) {
-                            finishFileReceive(task);
-                            delete incomingFiles[currentId];
-                            incomingFiles.currentId = null;
-                        }
-                    }
-                }
-            };
-        }
-
-        function processFileToSend(file) {
-            if (!dc || dc.readyState !== 'open') return alert("Koneksi belum siap!");
-            const fileId = Date.now().toString();
-            const meta = { id: fileId, name: file.name, size: file.size, type: file.type || "application/octet-stream" };
-            dc.send(JSON.stringify({ type: 'meta', data: meta }));
-            log(`⬆️ Mengirim: ${file.name}`, 'me');
-
-            const reader = new FileReader();
-            reader.onload = () => {
-                const buffer = reader.result;
-                let offset = 0;
-                const sendChunk = () => {
-                    if (offset < buffer.byteLength) {
-                        const chunk = buffer.slice(offset, offset + MAX_CHUNK);
-                        if (dc.bufferedAmount > 10000000) { setTimeout(sendChunk, 50); return; }
-                        dc.send(chunk);
-                        offset += MAX_CHUNK;
-                        setTimeout(sendChunk, 0);
-                    }
-                };
-                sendChunk();
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function sendFileTransferManual() {
-            const input = document.getElementById('fileTransferInput');
-            if (input.files.length > 0) processFileToSend(input.files[0]);
-        }
-
-        function sendMsg() {
-            const inp = document.getElementById('msgInput');
-            const txt = inp.value.trim();
-            if (!txt) return;
-            dc.send(txt);
-            log(txt, 'me');
-            inp.value = '';
-        }
-
-        function finishFileReceive(task) {
-            const blob = new Blob(task.buffer, { type: task.meta.type });
-            const url = URL.createObjectURL(blob);
-            const div = document.createElement('div');
-            div.className = 'msg peer';
-
-            if (task.meta.type.startsWith('image/')) {
-                div.style.background = 'transparent'; div.style.padding = 0;
-                div.innerHTML = `<img src="${url}" style="max-width:100%; border-radius:8px; display:block;">
-                             <a href="${url}" download="${task.meta.name}" class="file-link" style="margin-top:5px; display:block; font-size:0.8rem;">💾 Simpan Gambar</a>`;
-            } else {
-                div.innerHTML = `📂 <b>File Diterima:</b><br><a href="${url}" download="${task.meta.name}" style="color:#2563eb; font-weight:bold;">${task.meta.name}</a>`;
-            }
-            document.getElementById('msgs').appendChild(div);
-            autoScroll();
-        }
-
-        function log(txt, type) {
-            const d = document.createElement('div');
-            d.className = `msg ${type}`;
-            d.textContent = txt;
-            document.getElementById('msgs').appendChild(d);
-            autoScroll();
-        }
-
-        function setupDragDrop() {
-            const zone = document.getElementById('chat-zone');
-            zone.addEventListener('dragenter', e => { e.preventDefault(); zone.classList.add('drag-active'); });
-            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-active'); });
-            zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('drag-active'); });
-            zone.addEventListener('drop', e => {
-                e.preventDefault(); zone.classList.remove('drag-active');
-                if (e.dataTransfer.files.length > 0) processFileToSend(e.dataTransfer.files[0]);
-            });
-            document.onpaste = e => {
-                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                for (let item of items) { if (item.kind === 'file') processFileToSend(item.getAsFile()); }
-            };
-        }
-    </script>
-
+    <!-- Modular JavaScript -->
+    <script src="js/utils.js"></script>
+    <script src="js/file-transfer.js"></script>
+    <script src="js/input-handlers.js"></script>
+    <script src="js/native-app.js"></script>
 </body>
 
 </html>

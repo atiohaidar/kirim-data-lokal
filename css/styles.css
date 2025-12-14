@@ -1,0 +1,30 @@
+/* ========================================
+   Kirim Data - QR Mode Specific Styles
+   Styles specific to index.html (PeerJS + QR)
+   ======================================== */
+
+/* --- QR & ID Display --- */
+.qr-container {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.id-display {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 5px;
+    text-align: center;
+    color: var(--text);
+    margin: 0.5rem 0;
+    cursor: pointer;
+}
+
+/* --- Scanner --- */
+#reader {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    display: none;
+}
