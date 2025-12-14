@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/native.css">
+    <link rel="stylesheet" href="css/info-panel.css">
 </head>
 
 <body>
@@ -22,7 +23,7 @@
             <div class="rocket-trail"></div>
             <div class="splash-logo" id="splash-rocket">📡</div>
             <div class="splash-title">
-                <span class="hacker-text" data-text="Mode Offline">Mode Offline</span>
+                <span class="hacker-text" data-text="Tanpa Server">Tanpa Server</span>
             </div>
             <div class="splash-loader">
                 <div class="loader-bar"></div>
@@ -30,157 +31,254 @@
         </div>
     </div>
 
-    <div class="container" style="text-align: center;">
-        <!-- STEP 1: PILIH PERAN -->
-        <div id="step-role" class="step active">
-            <h1>📡 Kirim Data Offline</h1>
-            <p class="subtitle">Transfer file tanpa internet.<br>Tukar tiket untuk terhubung.</p>
+    <div class="page-layout">
+        <div class="container" style="text-align: center;">
+            <!-- STEP 1: PILIH PERAN -->
+            <div id="step-role" class="step active">
+                <h1>📡 WebRTC Tanpa Server</h1>
+                <p class="subtitle">Transfer file tanpa internet.<br>Tukar tiket untuk terhubung.</p>
 
-            <button class="btn" onclick="startHost()">
-                <span>📤 Saya Pengirim</span>
-            </button>
-            <button class="btn secondary" onclick="startJoiner()">
-                <span>📥 Saya Penerima</span>
-            </button>
-        </div>
+                <a href="native-how-it-works.html" class="btn text-link"
+                    style="margin-bottom: 1.5rem; display: inline-block; font-size: 0.9rem;">
+                    🤔 Bagaimana cara kerjanya?
+                </a>
 
-        <!-- HOST STEP 1: LOADING -->
-        <div id="host-step-1" class="step">
-            <h1>⏳ Membuat Tiket</h1>
-            <p class="subtitle">Tunggu sebentar...</p>
-
-            <div class="waiting-animation">
-                <div class="loader">⏳</div>
-                <p class="waiting-text">Sedang menyiapkan tiket undangan...</p>
-            </div>
-        </div>
-
-        <!-- HOST STEP 2: DOWNLOAD & UPLOAD TICKET -->
-        <div id="host-step-2" class="step">
-            <h1>📤 Langkah 1/2</h1>
-            <p class="subtitle">Kirim tiket undangan ke teman</p>
-
-            <button class="btn download" onclick="downloadTicket('offer')">
-                📥 Unduh Tiket Undangan
-            </button>
-
-            <button class="btn text-link" onclick="toggleManual('host-manual-offer')">
-                Atau salin kode manual (copy-paste)
-            </button>
-            <div id="host-manual-offer" class="manual-area">
-                <p>Salin semua kode ini:</p>
-                <textarea id="host-offer-text" readonly onclick="this.select()"></textarea>
-            </div>
-
-            <hr class="step-divider">
-
-            <h3>📥 Selanjutnya</h3>
-            <p class="subtitle" style="margin-bottom: 1rem;">Terima tiket balasan dari teman</p>
-
-            <div class="drop-zone" id="host-drop" onclick="triggerUpload('host-upload')">
-                <span class="icon-large">📂</span>
-                <p>Klik atau tarik file "tiket-balasan.json"</p>
-            </div>
-            <input type="file" id="host-upload" accept=".json" onchange="handleFileUpload(this, 'answer')">
-
-            <button class="btn text-link" onclick="toggleManual('host-manual-answer')">
-                Input kode balasan manual
-            </button>
-            <div id="host-manual-answer" class="manual-area">
-                <textarea id="host-answer-input" placeholder="Tempel kode balasan di sini..."></textarea>
-                <button class="btn" onclick="handleManualText('answer', 'host-answer-input')">
-                    Proses Kode
+                <button class="btn" onclick="startHost()">
+                    <span>📤 Saya Pengirim</span>
                 </button>
-            </div>
-        </div>
-
-        <!-- JOINER STEP 1: UPLOAD TICKET -->
-        <div id="joiner-step-1" class="step">
-            <h1>📥 Langkah 1/2</h1>
-            <p class="subtitle">Minta tiket undangan dari pengirim</p>
-
-            <div class="drop-zone" id="join-drop" onclick="triggerUpload('join-upload-offer')">
-                <span class="icon-large">📨</span>
-                <p>Klik atau tarik file "tiket-undangan.json"</p>
-            </div>
-            <input type="file" id="join-upload-offer" accept=".json" onchange="handleFileUpload(this, 'offer')">
-
-            <button class="btn text-link" onclick="toggleManual('join-manual-offer')">
-                Input kode undangan manual
-            </button>
-            <div id="join-manual-offer" class="manual-area">
-                <textarea id="join-offer-input" placeholder="Tempel kode undangan di sini..."></textarea>
-                <button class="btn" onclick="handleManualText('offer', 'join-offer-input')">
-                    Proses Kode
+                <button class="btn secondary" onclick="startJoiner()">
+                    <span>📥 Saya Penerima</span>
                 </button>
             </div>
 
-            <button class="btn secondary" onclick="showStep('step-role', 'left')">← Kembali</button>
-        </div>
+            <!-- HOST STEP 1: LOADING -->
+            <div id="host-step-1" class="step">
+                <h1>⏳ Membuat Tiket</h1>
+                <p class="subtitle">Tunggu sebentar...</p>
 
-        <!-- JOINER STEP 2: DOWNLOAD ANSWER -->
-        <div id="joiner-step-2" class="step">
-            <h1>📤 Langkah 2/2</h1>
-            <p class="subtitle">Kirim tiket balasan ke pengirim</p>
-
-            <div class="ticket-status">
-                <span class="icon">✅</span>
-                Tiket balasan siap!
-            </div>
-
-            <button class="btn download" onclick="downloadTicket('answer')">
-                📥 Unduh Tiket Balasan
-            </button>
-
-            <button class="btn text-link" onclick="toggleManual('join-manual-answer')">
-                Atau salin kode balasan
-            </button>
-            <div id="join-manual-answer" class="manual-area">
-                <p>Salin kode balasan ini:</p>
-                <textarea id="join-answer-text" readonly onclick="this.select()"></textarea>
-            </div>
-
-            <div class="waiting-animation" style="margin-top: 1rem;">
-                <div class="radar-container">
-                    <div class="radar-wave"></div>
-                    <div class="radar-wave"></div>
-                    <div class="radar-wave"></div>
-                    <div class="radar-center"></div>
+                <div class="waiting-animation">
+                    <div class="loader">⏳</div>
+                    <p class="waiting-text">Sedang menyiapkan tiket undangan...</p>
                 </div>
-                <p class="waiting-text">Menunggu pengirim memproses...</p>
-            </div>
-        </div>
-
-        <!-- CHAT ROOM -->
-        <div id="step-chat" class="step">
-            <div class="connected-badge" style="justify-content: center; margin-bottom: 1rem;">
-                <span class="connected-dot"></span>
-                Terhubung - Siap kirim file!
             </div>
 
-            <div class="chat-container" id="chat-zone">
-                <div class="chat-messages" id="msgs">
-                    <div class="msg system">
-                        ✅ <b>Berhasil terhubung!</b><br>
-                        Kirim pesan, tarik file, atau paste gambar.
+            <!-- HOST STEP 2: DOWNLOAD & UPLOAD TICKET -->
+            <div id="host-step-2" class="step">
+                <h1>📤 Langkah 1/2</h1>
+                <p class="subtitle">Salin & kirim tiket undangan ke teman</p>
+
+                <div class="manual-area visible">
+                    <p>1. Salin kode ini & kirim (WA/Chat):</p>
+                    <textarea id="host-offer-text" readonly onclick="this.select()"></textarea>
+                    <button class="btn" onclick="copyToClipboard('host-offer-text')">📋 Salin ke Clipboard</button>
+                </div>
+
+                <button class="btn text-link secondary-option" onclick="toggleManual('host-file-area')">
+                    Atau gunakan file JSON (Opsi lain) ▼
+                </button>
+
+                <div id="host-file-area" class="manual-area">
+                    <button class="btn download" onclick="downloadTicket('offer')">
+                        📥 Unduh Tiket sebagai File .JSON
+                    </button>
+                </div>
+
+                <hr class="step-divider">
+
+                <h3>📥 Selanjutnya</h3>
+                <p class="subtitle" style="margin-bottom: 1rem;">Tempel tiket balasan dari teman</p>
+
+                <div class="manual-area visible">
+                    <textarea id="host-answer-input" placeholder="2. Tempel kode balasan teman di sini..."></textarea>
+                    <button class="btn" onclick="handleManualText('answer', 'host-answer-input')">
+                        Proses Koneksi
+                    </button>
+                </div>
+
+                <button class="btn text-link secondary-option" onclick="toggleManual('host-upload-area')">
+                    Atau upload file balasan .JSON ▼
+                </button>
+
+                <div id="host-upload-area" class="manual-area">
+                    <div class="drop-zone" id="host-drop" onclick="triggerUpload('host-upload')">
+                        <span class="icon-large">📂</span>
+                        <p>Klik atau tarik file "tiket-balasan.json"</p>
+                    </div>
+                    <input type="file" id="host-upload" accept=".json" onchange="handleFileUpload(this, 'answer')">
+                </div>
+            </div>
+
+            <!-- JOINER STEP 1: UPLOAD TICKET -->
+            <div id="joiner-step-1" class="step">
+                <h1>📥 Langkah 1/2</h1>
+                <p class="subtitle">Tempel kode undangan dari pengirim</p>
+
+                <div class="manual-area visible">
+                    <textarea id="join-offer-input" placeholder="Tempel kode undangan teman di sini..."></textarea>
+                    <button class="btn" onclick="handleManualText('offer', 'join-offer-input')">
+                        Proses Kode
+                    </button>
+                </div>
+
+                <button class="btn text-link secondary-option" onclick="toggleManual('join-upload-area')">
+                    Atau upload file undangan .JSON ▼
+                </button>
+
+                <div id="join-upload-area" class="manual-area">
+                    <div class="drop-zone" id="join-drop" onclick="triggerUpload('join-upload-offer')">
+                        <span class="icon-large">📨</span>
+                        <p>Klik atau tarik file "tiket-undangan.json"</p>
+                    </div>
+                    <input type="file" id="join-upload-offer" accept=".json" onchange="handleFileUpload(this, 'offer')">
+                </div>
+
+                <button class="btn secondary" onclick="showStep('step-role', 'left')">← Kembali</button>
+            </div>
+
+            <!-- JOINER STEP 2: DOWNLOAD ANSWER -->
+            <div id="joiner-step-2" class="step">
+                <h1>📤 Langkah 2/2</h1>
+                <p class="subtitle">Kirim kode balasan ke pengirim</p>
+
+                <div class="ticket-status">
+                    <span class="icon">✅</span>
+                    Kode Balasan Siap!
+                </div>
+
+                <div class="manual-area visible">
+                    <p>Salin kode balasan ini & kirim balik:</p>
+                    <textarea id="join-answer-text" readonly onclick="this.select()"></textarea>
+                    <button class="btn" onclick="copyToClipboard('join-answer-text')">📋 Salin ke Clipboard</button>
+                </div>
+
+                <button class="btn text-link secondary-option" onclick="toggleManual('join-file-area')">
+                    Atau unduh file .JSON ▼
+                </button>
+
+                <div id="join-file-area" class="manual-area">
+                    <button class="btn download" onclick="downloadTicket('answer')">
+                        📥 Unduh Tiket Balasan
+                    </button>
+                </div>
+
+                <div class="waiting-animation" style="margin-top: 1rem;">
+                    <div class="radar-container">
+                        <div class="radar-wave"></div>
+                        <div class="radar-wave"></div>
+                        <div class="radar-wave"></div>
+                        <div class="radar-center"></div>
+                    </div>
+                    <p class="waiting-text">Menunggu pengirim memproses...</p>
+                </div>
+            </div>
+
+            <!-- CHAT ROOM -->
+            <div id="step-chat" class="step">
+                <div class="connected-badge" style="justify-content: center; margin-bottom: 1rem;">
+                    <span class="connected-dot"></span>
+                    Terhubung - Siap kirim file!
+                </div>
+
+                <div class="chat-container" id="chat-zone">
+                    <div class="chat-messages" id="msgs">
+                        <div class="msg system">
+                            ✅ <b>Berhasil terhubung!</b><br>
+                            Kirim pesan, tarik file, atau paste gambar.
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="msgInput" placeholder="Tulis pesan..."
+                            onkeypress="if(event.key==='Enter') sendMsg()">
+                        <button class="btn send-btn" onclick="sendMsg()">➤</button>
                     </div>
                 </div>
-                <div class="chat-input">
-                    <input type="text" id="msgInput" placeholder="Tulis pesan..."
-                        onkeypress="if(event.key==='Enter') sendMsg()">
-                    <button class="btn send-btn" onclick="sendMsg()">➤</button>
+
+                <div class="action-row">
+                    <button class="btn secondary" onclick="document.getElementById('fileTransferInput').click()">
+                        📎 Kirim File
+                    </button>
+                    <!-- Toggle Button for Info Panel -->
+                    <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()"
+                        style="width: auto;">
+                        <span>📊 Info</span>
+                    </button>
+                    <button class="btn danger" onclick="resetApp()">
+                        Keluar
+                    </button>
+                </div>
+                <input type="file" id="fileTransferInput" multiple onchange="sendFileTransferManual()">
+            </div>
+        </div>
+
+        <!-- Information Panel -->
+        <div class="info-panel" id="info-panel">
+            <div class="info-panel-header">
+                <h3>📊 Informasi Tambahan</h3>
+            </div>
+
+            <!-- Status Koneksi -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="card-icon">🔌</span>
+                    Status Koneksi
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Status</span>
+                    <span class="status-value" id="info-status">
+                        <span class="status-dot connecting"></span>
+                        Menunggu...
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Role</span>
+                    <span class="status-value" id="info-role">-</span>
                 </div>
             </div>
 
-            <div class="action-row">
-                <button class="btn secondary" onclick="document.getElementById('fileTransferInput').click()">
-                    📎 Kirim File
-                </button>
-                <button class="btn danger" onclick="resetApp()">
-                    Keluar
-                </button>
+            <!-- Statistik Transfer -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="card-icon">📈</span>
+                    Statistik Transfer
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-bytes-sent">0 B</div>
+                        <div class="stat-label">Dikirim</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-bytes-recv">0 B</div>
+                        <div class="stat-label">Diterima</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-files-sent">0</div>
+                        <div class="stat-label">File Kirim</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-files-recv">0</div>
+                        <div class="stat-label">File Terima</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-msg-sent">0</div>
+                        <div class="stat-label">Pesan Kirim</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-msg-recv">0</div>
+                        <div class="stat-label">Pesan Terima</div>
+                    </div>
+                </div>
             </div>
-            <input type="file" id="fileTransferInput" multiple onchange="sendFileTransferManual()">
+
+            <!-- Log Aktivitas -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="card-icon">📝</span>
+                    Log Aktivitas
+                </div>
+                <div class="activity-log" id="activity-log">
+                    <div class="empty-log">Belum ada aktivitas</div>
+                </div>
+            </div>
         </div>
     </div>
 

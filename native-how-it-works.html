@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cara Kerja WebRTC Murni - Kirim Data</title>
+    <meta name="description" content="Visualisasi interaktif cara kerja transfer file offline dengan tukar tiket.">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/visualization.css">
+</head>
+
+<body class="viz-page">
+    <div class="viz-container">
+        <!-- Header -->
+        <header class="viz-header">
+            <h1>📡 Cara Kerja WebRTC Murni</h1>
+            <a href="native.html" class="btn-back">← Kembali</a>
+        </header>
+
+        <!-- Main Content -->
+        <main class="viz-main">
+            <!-- Animation Canvas -->
+            <section class="viz-canvas" id="anim-canvas">
+                <!-- Reload Animation Button (top-right) -->
+                <button class="btn-reload-overlay" id="btn-reload" onclick="reloadAnimation()" title="Ulang Animasi">
+                    🔄
+                </button>
+                <!-- Animation content container (rendered by JS) -->
+                <div id="anim-content" class="anim-content"></div>
+            </section>
+
+            <!-- Explanation Panel -->
+            <section class="viz-explanation">
+                <h2 class="viz-step-title" id="step-title">Mode Tanpa Server</h2>
+                <p class="viz-step-subtitle" id="step-subtitle">
+                    Transfer file tanpa internet server, menggunakan pertukaran tiket manual.
+                </p>
+
+                <div class="viz-details" id="step-details">
+                    <!-- Details rendered by JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Navigation Controls -->
+        <footer class="viz-controls">
+            <div class="viz-progress">
+                <div class="progress-dot active" data-step="Intro" onclick="goToStep(0)"></div>
+                <div class="progress-dot" data-step="SDP Offer" onclick="goToStep(1)"></div>
+                <div class="progress-dot" data-step="Kirim Offer" onclick="goToStep(2)"></div>
+                <div class="progress-dot" data-step="SDP Answer" onclick="goToStep(3)"></div>
+                <div class="progress-dot" data-step="Kirim Answer" onclick="goToStep(4)"></div>
+                <div class="progress-dot" data-step="P2P Data" onclick="goToStep(5)"></div>
+            </div>
+
+            <div class="viz-nav-btns">
+                <button class="btn-nav" id="btn-prev" onclick="prevStep()" disabled>
+                    ← Sebelumnya
+                </button>
+                <button class="btn-nav" id="btn-next" onclick="nextStep()">
+                    Selanjutnya →
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/native-visualization.js"></script>
+</body>
+
+</html>
