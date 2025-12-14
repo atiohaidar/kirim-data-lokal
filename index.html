@@ -50,6 +50,12 @@
                 Cepat, aman, tanpa upload ke server.
             </p>
 
+            <!-- Optional Username -->
+            <!-- <div class="username-input-group">
+                <input type="text" id="username-input" class="username-input" placeholder="Username (opsional)"
+                    maxlength="20">
+            </div> -->
+
             <button class="btn" onclick="initHost()">
                 <span>📡 Buat Room Baru</span>
             </button>
@@ -61,12 +67,18 @@
         <!-- Step 2: Host Room (QR) -->
         <div id="step-host" class="step">
             <h1>📡 Room Kamu</h1>
-            <p class="subtitle">Scan QR atau bagikan kode untuk terhubung</p>
-
-            <div class="qr-container" id="qrcode"></div>
+            <p class="subtitle">Bagikan kode room untuk terhubung</p>
 
             <p style="text-align: center; margin:0; font-size:0.9rem; color:var(--text-secondary);">Kode Room:</p>
             <div id="my-id-display" class="id-display" onclick="copyId()" title="Klik untuk salin">...</div>
+
+            <!-- Optional QR Code Section -->
+            <div id="qr-section" style="display: none;">
+                <div class="qr-container" id="qrcode"></div>
+            </div>
+            <button id="btn-generate-qr" class="btn secondary" onclick="generateQR()" style="margin-bottom: 0.5rem;">
+                <span>📱 Tampilkan QR Code</span>
+            </button>
 
             <!-- Status Log - Cinematic Loading -->
             <div class="status-log" id="host-status-log">

@@ -17,21 +17,8 @@
 .qr-container img {
     border-radius: 12px;
     animation: scaleIn 0.5s ease-out;
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
-}
-
-/* QR Glow effect */
-.qr-container::before {
-    content: '';
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    background: var(--primary);
-    border-radius: 12px;
-    opacity: 0.2;
-    filter: blur(30px);
-    animation: pulse 3s ease-in-out infinite;
-    z-index: -1;
+    /* Simple border instead of glow */
+    border: 2px solid var(--border);
 }
 
 /* --- ID Display --- */
@@ -157,4 +144,34 @@
     border-radius: 50%;
     background: currentColor;
     animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* --- Optional Username Input --- */
+.username-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.username-input {
+    width: 100%;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.username-input::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.username-input:focus {
+    outline: none;
+    border-style: solid;
+    border-color: var(--primary);
+    background: rgba(16, 185, 129, 0.05);
 }

@@ -10,6 +10,28 @@ let myId;
 let html5QrCode;
 let isHost = false;
 let connectionTime = null;
+let myUsername = '';
+let peerUsername = '';
+
+// --- Audio Functions ---
+// Note: audioContext and base audio functions (playTone, playSendSound) are defined in entrance.js
+
+/**
+ * Sound for receiving message - lower pitch, notification style
+ * Uses playTone from entrance.js
+ */
+function playReceiveSound() {
+    playTone(523, 0.15, 'sine', 0.3); // C5 note
+    setTimeout(() => playTone(659, 0.15, 'sine', 0.3), 80); // E5 note
+}
+
+/**
+ * Get username from input
+ */
+function getUsername() {
+    const input = document.getElementById('username-input');
+    return input ? input.value.trim() : '';
+}
 
 // --- Info Panel State ---
 const infoState = {
@@ -133,13 +155,14 @@ function updateUsersUI() {
     }
 
     const joinTime = infoState.peerJoinTime ? getTimeAgo(infoState.peerJoinTime) : '';
-    const initial = infoState.peerId.charAt(0).toUpperCase();
+    const displayName = peerUsername || `Peer ${infoState.peerId}`;
+    const initial = peerUsername ? peerUsername.charAt(0).toUpperCase() : infoState.peerId.charAt(0).toUpperCase();
 
     container.innerHTML = `
         <div class="user-item">
             <div class="user-avatar">${initial}</div>
             <div class="user-info">
-                <div class="user-id">Peer ${infoState.peerId}</div>
+                <div class="user-id">${displayName}</div>
                 <div class="user-time">${joinTime}</div>
             </div>
         </div>
@@ -231,6 +254,7 @@ function trackMsgSent(msg) {
     infoState.stats.msgSent++;
     addActivityLog('info', `📤 Pesan terkirim`);
     updateStatsUI();
+    playSendSound();
 }
 
 /**
@@ -240,6 +264,7 @@ function trackMsgRecv(msg) {
     infoState.stats.msgRecv++;
     addActivityLog('info', `📥 Pesan diterima`);
     updateStatsUI();
+    playReceiveSound();
 }
 
 
@@ -309,9 +334,6 @@ function initHost() {
     idDisplay.style.opacity = '0.5';
     idDisplay.title = 'Menunggu koneksi ke server...';
 
-    const qrEl = document.getElementById('qrcode');
-    qrEl.innerHTML = '<div class="spinner"></div>';
-
     setTimeout(() => {
         statusLog('host-status-log', `ID Room: ${myId}`, '✓', 'success');
         statusLog('host-status-log', 'Menghubungkan ke server PeerJS...', '🌐', 'active');
@@ -327,38 +349,19 @@ function initHost() {
 
         peer.on('open', (id) => {
             statusLog('host-status-log', 'Terhubung ke server!', '✓', 'success');
-            statusLog('host-status-log', 'Membuat QR Code...', '📱', 'active');
 
             // NOW the peer is ready - show the actual ID
             idDisplay.textContent = id;
             idDisplay.style.opacity = '1';
             idDisplay.title = 'Klik untuk salin';
 
-            qrEl.innerHTML = "";
-
-            if (typeof QRCode === 'undefined') {
-                statusLog('host-status-log', 'Library QR tidak ditemukan!', '❌', 'error');
-                return;
-            }
-
-            new QRCode(qrEl, {
-                text: id,
-                width: 180,
-                height: 180,
-                colorDark: "#10b981",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
             // Update info panel with room ID
             infoState.roomId = id;
             updateStatusUI();
             addActivityLog('success', `🏠 Room ${id} siap`);
 
-            setTimeout(() => {
-                statusLog('host-status-log', 'QR Code siap!', '✓', 'success');
-                statusLog('host-status-log', 'Menunggu teman bergabung...', '📡', 'active');
-            }, 200);
+            statusLog('host-status-log', 'Room siap!', '✓', 'success');
+            statusLog('host-status-log', 'Menunggu teman bergabung...', '📡', 'active');
         });
 
         peer.on('connection', (c) => {
@@ -379,6 +382,42 @@ function initHost() {
 function copyId() {
     const text = document.getElementById('my-id-display').textContent;
     copyToClipboard(text, "ID Room disalin!");
+}
+
+/**
+ * Generate QR code on demand (optional feature)
+ */
+function generateQR() {
+    const qrSection = document.getElementById('qr-section');
+    const qrEl = document.getElementById('qrcode');
+    const btn = document.getElementById('btn-generate-qr');
+
+    if (!myId || myId === '····') {
+        showToast('Tunggu sampai room siap...');
+        return;
+    }
+
+    if (typeof QRCode === 'undefined') {
+        showToast('Library QR tidak tersedia');
+        return;
+    }
+
+    // Clear and generate QR
+    qrEl.innerHTML = '';
+    new QRCode(qrEl, {
+        text: myId,
+        width: 180,
+        height: 180,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Show QR section and hide button
+    qrSection.style.display = 'block';
+    btn.style.display = 'none';
+
+    addActivityLog('info', '📱 QR Code ditampilkan');
 }
 
 // ========================================
@@ -488,6 +527,9 @@ function setupConnection() {
     showStep('step-chat');
     log("✅ Terhubung dengan teman!");
 
+    // Get username from input
+    myUsername = getUsername();
+
     // Update info panel state
     infoState.status = 'connected';
     infoState.peerId = conn.peer;
@@ -496,8 +538,10 @@ function setupConnection() {
     updateInfoPanel();
     addActivityLog('success', `✅ Terhubung dengan peer ${conn.peer}`);
 
-    // Play connection sound
-    if (typeof playConnectSound === 'function') playConnectSound();
+    // Send our username to peer if we have one
+    if (myUsername) {
+        conn.send({ type: 'username', username: myUsername });
+    }
 
     // Update user time periodically
     setInterval(() => {
@@ -511,10 +555,16 @@ function setupConnection() {
             handleIncomingFileChunk(data);
         } else if (typeof data === 'object' && data.type === 'file') {
             handleIncomingFileLegacy(data);
+        } else if (typeof data === 'object' && data.type === 'username') {
+            // Handle username message
+            peerUsername = data.username;
+            updateUsersUI();
+            addActivityLog('info', `👤 Peer bernama: ${peerUsername}`);
         } else {
-            log(data, 'peer');
+            // Display with username if available
+            const displayName = peerUsername || `Peer`;
+            log(`<strong>${displayName}:</strong> ${data}`, 'peer');
             trackMsgRecv(data);
-            if (typeof playMessageSound === 'function') playMessageSound();
         }
     });
 
@@ -523,7 +573,6 @@ function setupConnection() {
         infoState.status = 'disconnected';
         updateStatusUI();
         addActivityLog('error', '❌ Koneksi terputus');
-        if (typeof playErrorSound === 'function') playErrorSound();
         setTimeout(() => alert("Koneksi terputus."), 1000);
     });
 }
