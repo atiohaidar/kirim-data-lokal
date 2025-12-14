@@ -185,6 +185,12 @@ function startJoiner() {
 function setupDataChannel(channel) {
     dc = channel;
     dc.onopen = () => {
+        // Force hide all steps first to ensure no UI artifacts remain
+        document.querySelectorAll('.step').forEach(el => {
+            el.classList.remove('active');
+            el.style.display = 'none';
+        });
+
         showStep('step-chat');
         setupNativeDragDrop();
         setupNativePaste();

@@ -431,8 +431,12 @@ function showJoin() {
     showStep('step-join');
 }
 
-function startScanner() {
+async function startScanner() {
     const readerDiv = document.getElementById('reader');
+
+    // Safety check: ensure previous instance is stopped
+    await stopScanner();
+
     readerDiv.style.display = 'block';
     document.getElementById('btn-scan').style.display = 'none';
 
@@ -441,28 +445,28 @@ function startScanner() {
 
     html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
         .catch(err => {
+            console.error("Scanner Error:", err);
             alert("Gagal membuka kamera: " + err + "\nPastikan anda mengizinkan akses kamera dan menggunakan HTTPS/localhost.");
-            readerDiv.style.display = 'none';
-            document.getElementById('btn-scan').style.display = 'block';
+            stopScanner();
         });
 }
 
 function stopScanner() {
     if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            html5QrCode.clear();
+        return html5QrCode.stop().then(() => {
+            try { html5QrCode.clear(); } catch (e) { }
             document.getElementById('reader').style.display = 'none';
             document.getElementById('btn-scan').style.display = 'block';
             html5QrCode = null;
         }).catch(err => {
             console.warn("Scanner stop warning:", err);
-            // If it fails to stop (e.g. already stopped), we still want to cleanup UI if possible
             try { html5QrCode.clear(); } catch (e) { }
             document.getElementById('reader').style.display = 'none';
             document.getElementById('btn-scan').style.display = 'block';
             html5QrCode = null;
         });
     }
+    return Promise.resolve();
 }
 
 function onScanSuccess(decodedText, decodedResult) {
