@@ -1,0 +1,700 @@
+/* ========================================
+   Kirim Data - Visualization Styles
+   Animations and layout for how-it-works page
+   ======================================== */
+
+:root {
+    --viz-bg: #0a0a0f;
+    --viz-card: rgba(20, 20, 30, 0.9);
+    --viz-primary: #00d4aa;
+    --viz-secondary: #6366f1;
+    --viz-accent: #f59e0b;
+    --viz-text: #e2e8f0;
+    --viz-muted: #64748b;
+    --viz-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body.viz-page {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--viz-bg);
+    color: var(--viz-text);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   LAYOUT
+   ======================================== */
+
+.viz-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.viz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--viz-border);
+    margin-bottom: 1rem;
+}
+
+.viz-header h1 {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-back {
+    background: transparent;
+    border: 1px solid var(--viz-border);
+    color: var(--viz-text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--viz-primary);
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+
+.viz-main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 1rem 0;
+}
+
+@media (max-width: 900px) {
+    .viz-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation Canvas Area */
+.viz-canvas {
+    background: var(--viz-card);
+    border-radius: 16px;
+    border: 1px solid var(--viz-border);
+    padding: 2rem;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Explanation Area */
+.viz-explanation {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.viz-step-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--viz-primary);
+}
+
+.viz-step-subtitle {
+    font-size: 1.1rem;
+    color: var(--viz-muted);
+    line-height: 1.6;
+}
+
+.viz-details {
+    background: var(--viz-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--viz-border);
+}
+
+.viz-details h3 {
+    font-size: 1rem;
+    color: var(--viz-accent);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.viz-details ul {
+    list-style: none;
+    padding: 0;
+}
+
+.viz-details li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--viz-border);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.viz-details li:last-child {
+    border-bottom: none;
+}
+
+.viz-details li::before {
+    content: "→";
+    color: var(--viz-primary);
+}
+
+/* Code snippet */
+.viz-code {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Consolas', monospace;
+    font-size: 0.85rem;
+    color: var(--viz-muted);
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.viz-code .keyword {
+    color: #c792ea;
+}
+
+.viz-code .string {
+    color: #c3e88d;
+}
+
+.viz-code .number {
+    color: #f78c6c;
+}
+
+.viz-code .comment {
+    color: #546e7a;
+}
+
+/* ========================================
+   NAVIGATION CONTROLS
+   ======================================== */
+
+.viz-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--viz-border);
+    margin-top: auto;
+}
+
+.viz-progress {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--viz-border);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.progress-dot:hover {
+    background: var(--viz-muted);
+    transform: scale(1.2);
+}
+
+.progress-dot.active {
+    background: var(--viz-primary);
+    box-shadow: 0 0 10px var(--viz-primary);
+}
+
+.progress-dot.completed {
+    background: var(--viz-secondary);
+}
+
+/* Tooltip for progress dots */
+.progress-dot::after {
+    content: attr(data-step);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--viz-card);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.progress-dot:hover::after {
+    opacity: 1;
+}
+
+.viz-nav-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-nav {
+    background: var(--viz-card);
+    border: 1px solid var(--viz-border);
+    color: var(--viz-text);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-nav:hover:not(:disabled) {
+    background: var(--viz-primary);
+    color: var(--viz-bg);
+    border-color: var(--viz-primary);
+}
+
+.btn-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-play {
+    background: var(--viz-primary);
+    color: var(--viz-bg);
+    border-color: var(--viz-primary);
+}
+
+.btn-play:hover {
+    background: #00b894;
+}
+
+/* ========================================
+   ANIMATION ELEMENTS
+   ======================================== */
+
+.anim-scene {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: none;
+}
+
+.anim-scene.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Devices */
+.device {
+    width: 80px;
+    height: 100px;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    border-radius: 12px;
+    border: 2px solid var(--viz-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    transition: all 0.5s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.device-screen {
+    width: 60px;
+    height: 50px;
+    background: #0f172a;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.device-label {
+    font-size: 0.7rem;
+    color: var(--viz-muted);
+}
+
+.device.active {
+    border-color: var(--viz-primary);
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+}
+
+/* Server */
+.server {
+    width: 100px;
+    height: 80px;
+    background: linear-gradient(135deg, #312e81, #4338ca);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    transition: all 0.5s ease;
+}
+
+.server-icon {
+    font-size: 2rem;
+}
+
+.server-label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+}
+
+.server.fade {
+    opacity: 0.3;
+}
+
+/* Connection Lines */
+.connection-line {
+    position: absolute;
+    height: 3px;
+    background: var(--viz-secondary);
+    transform-origin: left center;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.connection-line.active {
+    opacity: 1;
+}
+
+.connection-line.dashed {
+    background: repeating-linear-gradient(90deg,
+            var(--viz-secondary) 0px,
+            var(--viz-secondary) 8px,
+            transparent 8px,
+            transparent 16px);
+}
+
+.connection-line.p2p {
+    background: linear-gradient(90deg, var(--viz-primary), var(--viz-accent));
+    height: 4px;
+    border-radius: 2px;
+    box-shadow: 0 0 10px var(--viz-primary);
+}
+
+/* Data Packets */
+.data-packet {
+    width: 20px;
+    height: 16px;
+    background: var(--viz-accent);
+    border-radius: 4px;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: var(--viz-bg);
+    font-weight: bold;
+    box-shadow: 0 0 10px var(--viz-accent);
+}
+
+/* File representation */
+.file-icon {
+    width: 50px;
+    height: 60px;
+    background: linear-gradient(135deg, #475569, #64748b);
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.file-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-width: 10px;
+    border-style: solid;
+    border-color: #334155 #334155 #64748b #64748b;
+}
+
+/* Chunks */
+.file-chunks {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    max-width: 200px;
+}
+
+.chunk {
+    width: 16px;
+    height: 16px;
+    background: var(--viz-accent);
+    border-radius: 2px;
+    font-size: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--viz-bg);
+    opacity: 0;
+    animation: chunkAppear 0.3s forwards;
+}
+
+@keyframes chunkAppear {
+    from {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* QR Code Animation */
+.qr-anim {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 2px;
+    padding: 6px;
+}
+
+.qr-cell {
+    background: #000;
+    opacity: 0;
+    animation: qrFill 0.1s forwards;
+}
+
+@keyframes qrFill {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Room Code */
+.room-code {
+    font-family: 'Consolas', monospace;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--viz-primary);
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px var(--viz-primary);
+}
+
+/* Lock icon for security */
+.lock-icon {
+    font-size: 3rem;
+    animation: lockPulse 2s infinite;
+}
+
+@keyframes lockPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* ========================================
+   STEP ANIMATIONS
+   ======================================== */
+
+/* Intro animation */
+@keyframes floatUp {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.intro-logo {
+    font-size: 5rem;
+    animation: floatUp 3s ease-in-out infinite;
+}
+
+.intro-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    background: linear-gradient(90deg, var(--viz-primary), var(--viz-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Pulse animation for active elements */
+@keyframes pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 15px rgba(0, 212, 170, 0);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Data flying animation */
+@keyframes flyRight {
+    0% {
+        left: 20%;
+        opacity: 1;
+    }
+
+    100% {
+        left: 75%;
+        opacity: 1;
+    }
+}
+
+@keyframes flyToServer {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-60px);
+        opacity: 0;
+    }
+}
+
+/* Typing animation for code */
+@keyframes typeCursor {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.cursor-blink::after {
+    content: '|';
+    animation: typeCursor 1s infinite;
+    color: var(--viz-primary);
+}
+
+/* ========================================
+   INTERACTIVE ELEMENTS
+   ======================================== */
+
+.clickable {
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.clickable:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+.tooltip {
+    position: absolute;
+    background: var(--viz-card);
+    border: 1px solid var(--viz-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    max-width: 250px;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.tooltip.visible {
+    opacity: 1;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 600px) {
+    .viz-canvas {
+        min-height: 300px;
+        padding: 1rem;
+    }
+
+    .viz-step-title {
+        font-size: 1.4rem;
+    }
+
+    .device {
+        width: 60px;
+        height: 80px;
+    }
+
+    .device-screen {
+        width: 45px;
+        height: 35px;
+        font-size: 1rem;
+    }
+
+    .server {
+        width: 70px;
+        height: 60px;
+    }
+
+    .viz-nav-btns {
+        flex-wrap: wrap;
+    }
+
+    .btn-nav {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}

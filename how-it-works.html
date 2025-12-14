@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bagaimana Cara Kerjanya? - Kirim Data</title>
+    <meta name="description" content="Visualisasi interaktif cara kerja transfer file peer-to-peer di Kirim Data.">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/visualization.css">
+</head>
+
+<body class="viz-page">
+    <div class="viz-container">
+        <!-- Header -->
+        <header class="viz-header">
+            <h1>🎓 Bagaimana Cara Kerjanya?</h1>
+            <a href="index.html" class="btn-back">← Kembali</a>
+        </header>
+
+        <!-- Main Content -->
+        <main class="viz-main">
+            <!-- Animation Canvas -->
+            <section class="viz-canvas" id="anim-canvas">
+                <!-- Animation content rendered by JS -->
+            </section>
+
+            <!-- Explanation Panel -->
+            <section class="viz-explanation">
+                <h2 class="viz-step-title" id="step-title">Kirim Data</h2>
+                <p class="viz-step-subtitle" id="step-subtitle">
+                    Transfer file langsung antar perangkat dalam jaringan yang sama, tanpa upload ke server.
+                </p>
+
+                <div class="viz-details" id="step-details">
+                    <!-- Details rendered by JS -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Navigation Controls -->
+        <footer class="viz-controls">
+            <div class="viz-progress">
+                <div class="progress-dot active" data-step="Intro" onclick="goToStep(0)"></div>
+                <div class="progress-dot" data-step="Buat Room" onclick="goToStep(1)"></div>
+                <div class="progress-dot" data-step="Gabung" onclick="goToStep(2)"></div>
+                <div class="progress-dot" data-step="Koneksi P2P" onclick="goToStep(3)"></div>
+                <div class="progress-dot" data-step="Transfer" onclick="goToStep(4)"></div>
+            </div>
+
+            <div class="viz-nav-btns">
+                <button class="btn-nav" id="btn-prev" onclick="prevStep()" disabled>
+                    ← Sebelumnya
+                </button>
+                <button class="btn-nav" id="btn-reload" onclick="reloadAnimation()">
+                    🔄 Ulang Animasi
+                </button>
+                <button class="btn-nav" id="btn-next" onclick="nextStep()">
+                    Selanjutnya →
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/visualization.js"></script>
+</body>
+
+</html>

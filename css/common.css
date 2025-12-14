@@ -105,7 +105,7 @@ body::before {
     box-shadow: var(--card-shadow);
     width: 100%;
     max-width: 540px;
-    padding: 2rem;
+    padding: 1rem;
     position: relative;
     overflow: hidden;
 }
