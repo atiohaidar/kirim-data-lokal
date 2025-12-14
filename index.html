@@ -275,6 +275,13 @@
     <div id="video-overlay" class="video-overlay">
         <div class="remote-video-container">
             <video id="remote-video" autoplay playsinline></video>
+            <div id="video-stats" class="video-stats">
+                <div id="stat-rtt">RTT: -</div>
+                <div id="stat-fps">FPS: -</div>
+                <div id="stat-bitrate">Bitrate: -</div>
+                <div id="stat-res">Res: -</div>
+                <div id="stat-loss">Loss: 0%</div>
+            </div>
             <div class="local-video-container">
                 <video id="local-video" autoplay muted playsinline></video>
             </div>
@@ -282,6 +289,8 @@
         <div class="video-controls">
             <!-- <button id="btn-quality" class="video-btn" onclick="VideoCall.toggleQuality()"
                 title="Ganti Kualitas (Eco/HD)">⚡</button> -->
+            <button id="btn-stats" class="video-btn" onclick="VideoCall.toggleStats()"
+                title="Info Statistik">ℹ️</button>
             <button id="btn-switch-cam" class="video-btn" onclick="VideoCall.switchCamera()"
                 title="Ganti Kamera">🔄</button>
             <button id="btn-toggle-mic" class="video-btn" onclick="VideoCall.toggleAudio()">🎤</button>

@@ -11,6 +11,8 @@ const NativeVideo = {
     isVideoActive: false,
     isEcoMode: true, // Default to Eco (VGA)
     currentFacingMode: 'user', // 'user' or 'environment'
+    statsInterval: null,
+    isStatsVisible: false,
 
     /**
      * Start a video call (Caller)
@@ -47,6 +49,7 @@ const NativeVideo = {
 
             this.isVideoActive = true;
             addActivityLog('info', '📞 Memanggil video...');
+            this.startStatsPolling();
 
         } catch (err) {
             console.error('Failed to start video:', err);
@@ -115,6 +118,7 @@ const NativeVideo = {
 
             this.isVideoActive = true;
             this.pendingOffer = null;
+            this.startStatsPolling();
 
         } catch (err) {
             console.error('Failed to answer:', err);
@@ -132,6 +136,67 @@ const NativeVideo = {
         }
         this.endCallInternal();
     },
+
+    // --- Stats & Monitoring ---
+
+    toggleStats() {
+        this.isStatsVisible = !this.isStatsVisible;
+        const statsDiv = document.getElementById('video-stats');
+        if (statsDiv) {
+            statsDiv.classList.toggle('visible', this.isStatsVisible);
+        }
+    },
+
+    startStatsPolling() {
+        if (this.statsInterval) clearInterval(this.statsInterval);
+
+        let lastBytesReceived = 0;
+        let lastTimestamp = Date.now();
+
+        this.statsInterval = setInterval(async () => {
+            if (!this.isStatsVisible || !pc) return;
+
+            try {
+                const stats = await pc.getStats();
+                let fps = 0, width = 0, height = 0, bitrate = 0, rtt = 0, loss = 0;
+
+                stats.forEach(report => {
+                    if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                        // FPS & Resolution
+                        fps = report.framesPerSecond || 0;
+                        width = report.frameWidth || 0;
+                        height = report.frameHeight || 0;
+                        loss = report.packetsLost || 0;
+
+                        // Bitrate Calculation
+                        const now = Date.now();
+                        const bytes = report.bytesReceived;
+                        if (lastBytesReceived > 0) {
+                            const deltaBytes = bytes - lastBytesReceived;
+                            const deltaTime = (now - lastTimestamp) / 1000; // seconds
+                            bitrate = Math.round((deltaBytes * 8) / deltaTime / 1000); // kbps
+                        }
+                        lastBytesReceived = bytes;
+                        lastTimestamp = now;
+                    }
+                    if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                        rtt = Math.round(report.currentRoundTripTime * 1000);
+                    }
+                });
+
+                document.getElementById('stat-rtt').textContent = `RTT: ${rtt}ms`;
+                document.getElementById('stat-fps').textContent = `FPS: ${Math.round(fps)}`;
+                document.getElementById('stat-bitrate').textContent = `Bitrate: ${bitrate} kbps`;
+                document.getElementById('stat-res').textContent = `Res: ${width}x${height}`;
+                document.getElementById('stat-loss').textContent = `Loss: ${loss}`;
+
+            } catch (e) {
+                console.log("Stats error", e);
+            }
+        }, 1000);
+    },
+    this.endCallInternal();
+},
 
     /**
      * Internal cleanup
@@ -162,128 +227,128 @@ const NativeVideo = {
         pc.getSenders().forEach(sender => pc.removeTrack(sender));
     },
 
-    // --- Media Controls ---
+        // --- Media Controls ---
 
-    toggleAudio() {
-        if (this.localStream) {
-            const audioTrack = this.localStream.getAudioTracks()[0];
-            if (audioTrack) {
-                this.isMuted = !this.isMuted;
-                audioTrack.enabled = !this.isMuted;
-                this.updateControlUI('btn-toggle-mic', this.isMuted, '🎤', '🔇');
-            }
-        }
-    },
-
-    toggleVideo() {
-        if (this.localStream) {
-            const videoTrack = this.localStream.getVideoTracks()[0];
-            if (videoTrack) {
-                this.isCameraOff = !this.isCameraOff;
-                videoTrack.enabled = !this.isCameraOff;
-                this.updateControlUI('btn-toggle-cam', this.isCameraOff, '📹', '🚫');
-            }
-        }
-    },
-
-    updateControlUI(btnId, isOff, onIcon, offIcon) {
-        const btn = document.getElementById(btnId);
-        if (btn) {
-            btn.innerHTML = isOff ? offIcon : onIcon;
-            btn.classList.toggle('off', isOff);
-        }
-    },
-
-    // --- UI Helpers ---
-
-    showVideoUI() {
-        document.getElementById('video-overlay').classList.add('visible');
-    },
-
-    hideVideoUI() {
-        document.getElementById('video-overlay').classList.remove('visible');
-    },
-
-    displayLocalVideo(stream) {
-        const video = document.getElementById('local-video');
-        video.srcObject = stream;
-        video.muted = true;
-    },
-
-    displayRemoteVideo(stream) {
-        const video = document.getElementById('remote-video');
-        video.srcObject = stream;
-    },
-
-    // --- Advanced Camera Controls ---
-
-    getConstraints() {
-        // Eco Mode: VGA (640x480) @ 15fps - Hemat Baterai & Data
-        // HD Mode: HD (1280x720) @ 30fps
-        const videoConstraints = this.isEcoMode
-            ? { width: 640, height: 480, frameRate: 15, facingMode: this.currentFacingMode }
-            : { width: 1280, height: 720, frameRate: 30, facingMode: this.currentFacingMode };
-
-        return {
-            video: videoConstraints,
-            audio: { echoCancellation: true, noiseSuppression: true }
-        };
-    },
-
-    async switchCamera() {
-        if (!this.localStream) return;
-        this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
-        await this.restartStream();
-        addActivityLog('info', `📷 Kamera: ${this.currentFacingMode === 'user' ? 'Depan' : 'Belakang'}`);
-    },
-
-    async toggleQuality() {
-        if (!this.localStream) return;
-        this.isEcoMode = !this.isEcoMode;
-        await this.restartStream();
-
-        const mode = this.isEcoMode ? 'Eco (Hemat)' : 'HD (Jernih)';
-        addActivityLog('info', `⚡ Mode Video: ${mode}`);
-
-        // Update UI button text if needed, or toast
-        const btn = document.getElementById('btn-quality');
-        if (btn) btn.innerHTML = this.isEcoMode ? '⚡' : 'ᴴᴰ';
-    },
-
-    async restartStream() {
-        // 1. Stop current tracks
-        if (this.localStream) {
-            this.localStream.getTracks().forEach(t => t.stop());
-        }
-
-        try {
-            // 2. Get new stream
-            const newStream = await navigator.mediaDevices.getUserMedia(this.getConstraints());
-            this.localStream = newStream;
-            this.displayLocalVideo(newStream);
-
-            // 3. Replace track in Sender (Seamless Switch)
-            if (pc) {
-                const videoTrack = newStream.getVideoTracks()[0];
-                const audioTrack = newStream.getAudioTracks()[0];
-
-                const senders = pc.getSenders();
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-
-                if (videoSender && videoTrack) await videoSender.replaceTrack(videoTrack);
-                if (audioSender && audioTrack) await audioSender.replaceTrack(audioTrack);
-            }
-
-            // Restore Mute/Video Off state
-            if (this.isMuted && newStream.getAudioTracks()[0]) newStream.getAudioTracks()[0].enabled = false;
-            if (this.isCameraOff && newStream.getVideoTracks()[0]) newStream.getVideoTracks()[0].enabled = false;
-
-        } catch (err) {
-            console.error("Camera switch failed", err);
-            alert("Gagal ganti kamera: " + err.message);
+        toggleAudio() {
+    if (this.localStream) {
+        const audioTrack = this.localStream.getAudioTracks()[0];
+        if (audioTrack) {
+            this.isMuted = !this.isMuted;
+            audioTrack.enabled = !this.isMuted;
+            this.updateControlUI('btn-toggle-mic', this.isMuted, '🎤', '🔇');
         }
     }
+},
+
+toggleVideo() {
+    if (this.localStream) {
+        const videoTrack = this.localStream.getVideoTracks()[0];
+        if (videoTrack) {
+            this.isCameraOff = !this.isCameraOff;
+            videoTrack.enabled = !this.isCameraOff;
+            this.updateControlUI('btn-toggle-cam', this.isCameraOff, '📹', '🚫');
+        }
+    }
+},
+
+updateControlUI(btnId, isOff, onIcon, offIcon) {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+        btn.innerHTML = isOff ? offIcon : onIcon;
+        btn.classList.toggle('off', isOff);
+    }
+},
+
+// --- UI Helpers ---
+
+showVideoUI() {
+    document.getElementById('video-overlay').classList.add('visible');
+},
+
+hideVideoUI() {
+    document.getElementById('video-overlay').classList.remove('visible');
+},
+
+displayLocalVideo(stream) {
+    const video = document.getElementById('local-video');
+    video.srcObject = stream;
+    video.muted = true;
+},
+
+displayRemoteVideo(stream) {
+    const video = document.getElementById('remote-video');
+    video.srcObject = stream;
+},
+
+// --- Advanced Camera Controls ---
+
+getConstraints() {
+    // Eco Mode: VGA (640x480) @ 15fps - Hemat Baterai & Data
+    // HD Mode: HD (1280x720) @ 30fps
+    const videoConstraints = this.isEcoMode
+        ? { width: 640, height: 480, frameRate: 15, facingMode: this.currentFacingMode }
+        : { width: 1280, height: 720, frameRate: 30, facingMode: this.currentFacingMode };
+
+    return {
+        video: videoConstraints,
+        audio: { echoCancellation: true, noiseSuppression: true }
+    };
+},
+
+    async switchCamera() {
+    if (!this.localStream) return;
+    this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
+    await this.restartStream();
+    addActivityLog('info', `📷 Kamera: ${this.currentFacingMode === 'user' ? 'Depan' : 'Belakang'}`);
+},
+
+    async toggleQuality() {
+    if (!this.localStream) return;
+    this.isEcoMode = !this.isEcoMode;
+    await this.restartStream();
+
+    const mode = this.isEcoMode ? 'Eco (Hemat)' : 'HD (Jernih)';
+    addActivityLog('info', `⚡ Mode Video: ${mode}`);
+
+    // Update UI button text if needed, or toast
+    const btn = document.getElementById('btn-quality');
+    if (btn) btn.innerHTML = this.isEcoMode ? '⚡' : 'ᴴᴰ';
+},
+
+    async restartStream() {
+    // 1. Stop current tracks
+    if (this.localStream) {
+        this.localStream.getTracks().forEach(t => t.stop());
+    }
+
+    try {
+        // 2. Get new stream
+        const newStream = await navigator.mediaDevices.getUserMedia(this.getConstraints());
+        this.localStream = newStream;
+        this.displayLocalVideo(newStream);
+
+        // 3. Replace track in Sender (Seamless Switch)
+        if (pc) {
+            const videoTrack = newStream.getVideoTracks()[0];
+            const audioTrack = newStream.getAudioTracks()[0];
+
+            const senders = pc.getSenders();
+            const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+            const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+
+            if (videoSender && videoTrack) await videoSender.replaceTrack(videoTrack);
+            if (audioSender && audioTrack) await audioSender.replaceTrack(audioTrack);
+        }
+
+        // Restore Mute/Video Off state
+        if (this.isMuted && newStream.getAudioTracks()[0]) newStream.getAudioTracks()[0].enabled = false;
+        if (this.isCameraOff && newStream.getVideoTracks()[0]) newStream.getVideoTracks()[0].enabled = false;
+
+    } catch (err) {
+        console.error("Camera switch failed", err);
+        alert("Gagal ganti kamera: " + err.message);
+    }
+}
 };
 
 // Hook up listener for tracks

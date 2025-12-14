@@ -12,6 +12,8 @@ const VideoCall = {
     isCameraOff: false,
     isEcoMode: true, // Default to Eco (VGA)
     currentFacingMode: 'user', // 'user' or 'environment'
+    statsInterval: null,
+    isStatsVisible: false,
 
     /**
      * Initialize video call module
@@ -60,6 +62,7 @@ const VideoCall = {
             // 3. Make the call
             const call = this.peerInstance.call(remotePeerId, stream);
             this.handleCallEvents(call);
+            this.startStatsPolling();
 
         } catch (err) {
             console.error('Failed to get local stream', err);
@@ -87,6 +90,7 @@ const VideoCall = {
 
             // 4. Handle stream events
             this.handleCallEvents(call);
+            this.startStatsPolling();
 
         } catch (err) {
             console.error('Failed to get local stream', err);
@@ -144,6 +148,71 @@ const VideoCall = {
         if (typeof addActivityLog === 'function') {
             addActivityLog('info', '📴 Panggilan berakhir');
         }
+
+        if (this.statsInterval) {
+            clearInterval(this.statsInterval);
+            this.statsInterval = null;
+        }
+    },
+
+    // --- Stats & Monitoring ---
+
+    toggleStats() {
+        this.isStatsVisible = !this.isStatsVisible;
+        const statsDiv = document.getElementById('video-stats');
+        if (statsDiv) {
+            statsDiv.classList.toggle('visible', this.isStatsVisible);
+        }
+    },
+
+    startStatsPolling() {
+        if (this.statsInterval) clearInterval(this.statsInterval);
+
+        let lastBytesReceived = 0;
+        let lastTimestamp = Date.now();
+
+        this.statsInterval = setInterval(async () => {
+            if (!this.isStatsVisible || !this.currentCall || !this.currentCall.peerConnection) return;
+            const pc = this.currentCall.peerConnection;
+
+            try {
+                const stats = await pc.getStats();
+                let fps = 0, width = 0, height = 0, bitrate = 0, rtt = 0, loss = 0;
+
+                stats.forEach(report => {
+                    if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                        // FPS & Resolution
+                        fps = report.framesPerSecond || 0;
+                        width = report.frameWidth || 0;
+                        height = report.frameHeight || 0;
+                        loss = report.packetsLost || 0;
+
+                        // Bitrate Calculation
+                        const now = Date.now();
+                        const bytes = report.bytesReceived;
+                        if (lastBytesReceived > 0) {
+                            const deltaBytes = bytes - lastBytesReceived;
+                            const deltaTime = (now - lastTimestamp) / 1000; // seconds
+                            bitrate = Math.round((deltaBytes * 8) / deltaTime / 1000); // kbps
+                        }
+                        lastBytesReceived = bytes;
+                        lastTimestamp = now;
+                    }
+                    if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                        rtt = Math.round(report.currentRoundTripTime * 1000);
+                    }
+                });
+
+                document.getElementById('stat-rtt').textContent = `RTT: ${rtt}ms`;
+                document.getElementById('stat-fps').textContent = `FPS: ${Math.round(fps)}`;
+                document.getElementById('stat-bitrate').textContent = `Bitrate: ${bitrate} kbps`;
+                document.getElementById('stat-res').textContent = `Res: ${width}x${height}`;
+                document.getElementById('stat-loss').textContent = `Loss: ${loss}`;
+
+            } catch (e) {
+                console.log("Stats error", e);
+            }
+        }, 1000);
     },
 
     // --- Media Controls ---
