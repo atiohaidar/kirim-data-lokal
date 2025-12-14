@@ -6,6 +6,7 @@
 // --- Global State ---
 let pc, dc;
 let localTicket = null;
+let incomingFiles = {};
 const MAX_CHUNK = 16 * 1024;
 const config = { iceServers: [] };
 

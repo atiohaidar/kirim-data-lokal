@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirim Data (PeerJS + QR)</title>
+    <title>Kirim Data - Transfer File Cepat</title>
+    <meta name="description"
+        content="Kirim file langsung antar perangkat lewat jaringan lokal. Cepat, aman, tanpa upload ke server.">
 
     <!-- External Libraries -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -12,94 +14,122 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
-    <div class="container">
-        <div id="header-status">
-            <h1>🚀 Kirim Data (QR)</h1>
-        </div>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-logo">🚀</div>
+        <div class="splash-title">Kirim Data</div>
+        <div class="splash-subtitle">Transfer file antar perangkat dengan cepat</div>
+    </div>
 
+    <div class="container">
         <!-- Step 1: Menu Awal -->
         <div id="step-menu" class="step active">
-            <p style="text-align: center; margin-bottom: 2rem; color: var(--text-light);">
-                Kirim file langsung lewat jaringan (P2P). <br>
-                Scan QR atau pakai ID.
+            <h1>🚀 Kirim Data</h1>
+            <p class="subtitle">
+                Transfer file langsung antar perangkat.<br>
+                Cepat, aman, tanpa upload ke server.
             </p>
 
             <button class="btn" onclick="initHost()">
-                <span>Buat Room (Tampilkan QR)</span>
+                <span>📡 Buat Room Baru</span>
             </button>
             <button class="btn secondary" onclick="showJoin()">
-                <span>Gabung Room (Scan QR)</span>
+                <span>🔗 Gabung ke Room</span>
             </button>
         </div>
 
         <!-- Step 2: Host Room (QR) -->
         <div id="step-host" class="step">
-            <p style="text-align: center; margin-bottom:0;">Scan QR ini untuk bergabung:</p>
+            <h1>📡 Room Kamu</h1>
+            <p class="subtitle">Scan QR atau bagikan kode untuk terhubung</p>
 
             <div class="qr-container" id="qrcode"></div>
 
-            <p style="text-align: center; margin:0; font-size:0.9rem; color:var(--text-light);">Atau pakai ID:</p>
+            <p style="text-align: center; margin:0; font-size:0.9rem; color:var(--text-secondary);">Kode Room:</p>
             <div id="my-id-display" class="id-display" onclick="copyId()" title="Klik untuk salin">...</div>
 
-            <div style="text-align: center; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-light);">
-                Menunggu koneksi...
+            <!-- Radar animation for waiting -->
+            <div class="waiting-status">
+                <div class="radar-container">
+                    <div class="radar-wave"></div>
+                    <div class="radar-wave"></div>
+                    <div class="radar-wave"></div>
+                    <div class="radar-center"></div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Menunggu teman bergabung...</p>
             </div>
 
-            <button class="btn secondary" onclick="resetApp()">Batal</button>
+            <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
         </div>
 
         <!-- Step 3: Join Input / Scan -->
         <div id="step-join" class="step">
+            <h1>🔗 Gabung Room</h1>
+            <p class="subtitle">Scan QR atau masukkan kode room</p>
+
             <div id="reader"></div>
 
             <button id="btn-scan" class="btn" onclick="startScanner()">📷 Scan QR Kamera</button>
 
-            <p style="text-align: center; margin: 1rem 0;">Atau masukkan ID manual:</p>
-            <input type="text" id="join-id-input" placeholder="Contoh: 4821" maxlength="6">
-            <button id="btn-join" class="btn" onclick="joinRoom()">Sambungkan</button>
+            <div style="text-align: center; margin: 1.5rem 0; color: var(--text-muted);">
+                <span style="background: var(--bg-dark); padding: 0 1rem;">atau</span>
+            </div>
+
+            <input type="text" id="join-id-input" placeholder="Masukkan kode room" maxlength="6">
+            <button id="btn-join" class="btn" onclick="joinRoom()">Hubungkan</button>
 
             <!-- Loading Indicator -->
             <div id="join-loading" style="display: none; text-align: center; margin: 1rem 0;">
                 <div class="spinner" style="margin: 1rem auto;"></div>
-                <p style="color: var(--text-light); font-size: 0.9rem;">Menyambungkan ke room...</p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Menghubungkan ke room...</p>
             </div>
 
-            <button class="btn secondary" onclick="resetApp()">Kembali</button>
+            <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
         </div>
 
         <!-- Step 4: Chat Interface -->
         <div id="step-chat" class="step">
+            <div class="connected-badge">
+                <span class="connected-dot"></span>
+                Terhubung
+            </div>
+
             <div class="chat-box" id="chat-box"></div>
 
             <!-- Drag & Drop Overlay -->
             <div id="drag-overlay" class="drag-overlay" style="display: none;">
                 <div class="drag-content">
-                    📂 Lepaskan file di sini untuk mengirim
+                    <span class="emoji">📂</span>
+                    Lepaskan file di sini
                 </div>
             </div>
 
             <div class="input-group">
-                <input type="text" id="msg-input" placeholder="Ketik pesan..." onkeypress="handleKey(event)">
-                <button class="btn" onclick="sendMsg()" style="width: auto; margin-bottom: 0;">➤</button>
+                <input type="text" id="msg-input" placeholder="Tulis pesan..." onkeypress="handleKey(event)">
+                <button class="btn send-btn" onclick="sendMsg()">➤</button>
             </div>
 
-            <label for="fileInput">📎 Klik untuk kirim file (atau Drag & Drop / Paste)</label>
+            <label for="fileInput">📎 Kirim file (klik, drag & drop, atau paste)</label>
             <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(this)">
 
             <div style="text-align: center; margin-top: 1rem;">
-                <button class="btn secondary" onclick="resetApp()"
-                    style="width: auto; padding: 5px 15px; font-size: 0.8rem;">Keluar</button>
+                <button class="btn secondary danger" onclick="resetApp()"
+                    style="width: auto; padding: 8px 20px; font-size: 0.85rem;">
+                    Keluar Room
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Modular JavaScript -->
+    <script src="js/entrance.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/file-transfer.js"></script>
     <script src="js/input-handlers.js"></script>

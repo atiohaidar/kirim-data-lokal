@@ -4,126 +4,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirim Data (Offline Mode)</title>
+    <title>Kirim Data - Mode Offline</title>
+    <meta name="description"
+        content="Transfer file tanpa internet menggunakan WebRTC. Tukar file langsung antar perangkat.">
 
     <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/native.css">
 </head>
 
 <body>
-    <div class="container" style="text-align: center;">
-        <h1>📡 Kirim Data Offline</h1>
-        <p class="subtitle">Tanpa Internet, Tanpa Server. Tukar File atau Copy-Paste.</p>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-logo">📡</div>
+        <div class="splash-title">Mode Offline</div>
+        <div class="splash-subtitle">Transfer file tanpa internet</div>
+    </div>
 
+    <div class="container" style="text-align: center;">
         <!-- STEP 1: PILIH PERAN -->
         <div id="step-role" class="step active">
-            <button class="btn" onclick="startHost()"><span>📤 Saya Pengirim (Host)</span></button>
-            <button class="btn secondary" onclick="startJoiner()"><span>📥 Saya Penerima (Joiner)</span></button>
+            <h1>📡 Kirim Data Offline</h1>
+            <p class="subtitle">Transfer file tanpa internet.<br>Tukar tiket untuk terhubung.</p>
+
+            <button class="btn" onclick="startHost()">
+                <span>📤 Saya Pengirim</span>
+            </button>
+            <button class="btn secondary" onclick="startJoiner()">
+                <span>📥 Saya Penerima</span>
+            </button>
         </div>
 
         <!-- HOST STEP 1: LOADING -->
         <div id="host-step-1" class="step">
-            <p>1. Sistem sedang membuat Tiket...</p>
-            <div class="drop-zone" style="border:none; background:transparent;">
+            <h1>⏳ Membuat Tiket</h1>
+            <p class="subtitle">Tunggu sebentar...</p>
+
+            <div class="waiting-animation">
                 <div class="loader">⏳</div>
+                <p class="waiting-text">Sedang menyiapkan tiket undangan...</p>
             </div>
         </div>
 
         <!-- HOST STEP 2: DOWNLOAD & UPLOAD TICKET -->
         <div id="host-step-2" class="step">
-            <h3>Langkah 1 dari 2</h3>
-            <p><b>Opsi A:</b> Download file Tiket & kirim ke teman.</p>
-            <button class="btn download" onclick="downloadTicket('offer')">Saved "tiket-undangan.json"</button>
+            <h1>📤 Langkah 1/2</h1>
+            <p class="subtitle">Kirim tiket undangan ke teman</p>
 
-            <button class="btn text-link" onclick="toggleManual('host-manual-offer')">Atau salin kode teks manual
-                (Copy-Paste)</button>
+            <button class="btn download" onclick="downloadTicket('offer')">
+                📥 Unduh Tiket Undangan
+            </button>
+
+            <button class="btn text-link" onclick="toggleManual('host-manual-offer')">
+                Atau salin kode manual (copy-paste)
+            </button>
             <div id="host-manual-offer" class="manual-area">
-                <p style="font-size:0.8rem; margin:0 0 5px 0;">Salin kode ini:</p>
+                <p>Salin semua kode ini:</p>
                 <textarea id="host-offer-text" readonly onclick="this.select()"></textarea>
             </div>
 
-            <hr style="margin: 1.5rem 0; border:none; border-top:1px solid #eee;">
+            <hr class="step-divider">
 
-            <p><b>Langkah Selanjutnya:</b> Terima Tiket Balasan dari teman.</p>
+            <h3>📥 Selanjutnya</h3>
+            <p class="subtitle" style="margin-bottom: 1rem;">Terima tiket balasan dari teman</p>
+
             <div class="drop-zone" id="host-drop" onclick="triggerUpload('host-upload')">
                 <span class="icon-large">📂</span>
-                <p>Klik / Tarik File "tiket-balasan.json"</p>
+                <p>Klik atau tarik file "tiket-balasan.json"</p>
             </div>
             <input type="file" id="host-upload" accept=".json" onchange="handleFileUpload(this, 'answer')">
 
-            <button class="btn text-link" onclick="toggleManual('host-manual-answer')">Input manual kode
-                balasan</button>
+            <button class="btn text-link" onclick="toggleManual('host-manual-answer')">
+                Input kode balasan manual
+            </button>
             <div id="host-manual-answer" class="manual-area">
                 <textarea id="host-answer-input" placeholder="Tempel kode balasan di sini..."></textarea>
-                <button class="btn" onclick="handleManualText('answer', 'host-answer-input')">Proses Kode</button>
+                <button class="btn" onclick="handleManualText('answer', 'host-answer-input')">
+                    Proses Kode
+                </button>
             </div>
         </div>
 
         <!-- JOINER STEP 1: UPLOAD TICKET -->
         <div id="joiner-step-1" class="step">
-            <h3>Langkah 1 dari 2</h3>
-            <p>Minta Tiket Undangan dari Host.</p>
+            <h1>📥 Langkah 1/2</h1>
+            <p class="subtitle">Minta tiket undangan dari pengirim</p>
 
             <div class="drop-zone" id="join-drop" onclick="triggerUpload('join-upload-offer')">
                 <span class="icon-large">📨</span>
-                <p>Klik / Tarik File "tiket-undangan.json"</p>
+                <p>Klik atau tarik file "tiket-undangan.json"</p>
             </div>
             <input type="file" id="join-upload-offer" accept=".json" onchange="handleFileUpload(this, 'offer')">
 
-            <button class="btn text-link" onclick="toggleManual('join-manual-offer')">Input manual kode
-                undangan</button>
+            <button class="btn text-link" onclick="toggleManual('join-manual-offer')">
+                Input kode undangan manual
+            </button>
             <div id="join-manual-offer" class="manual-area">
-                <textarea id="join-offer-input" placeholder="Tempel kode undangan Host di sini..."></textarea>
-                <button class="btn" onclick="handleManualText('offer', 'join-offer-input')">Proses Kode</button>
+                <textarea id="join-offer-input" placeholder="Tempel kode undangan di sini..."></textarea>
+                <button class="btn" onclick="handleManualText('offer', 'join-offer-input')">
+                    Proses Kode
+                </button>
             </div>
+
+            <button class="btn secondary" onclick="showStep('step-role', 'left')">← Kembali</button>
         </div>
 
         <!-- JOINER STEP 2: DOWNLOAD ANSWER -->
         <div id="joiner-step-2" class="step">
-            <h3>Langkah 2 dari 2</h3>
-            <p>Tiket Balasan siap! Kirim kembali ke Host.</p>
+            <h1>📤 Langkah 2/2</h1>
+            <p class="subtitle">Kirim tiket balasan ke pengirim</p>
 
-            <button class="btn download" onclick="downloadTicket('answer')">Saved "tiket-balasan.json"</button>
+            <div class="ticket-status">
+                <span class="icon">✅</span>
+                Tiket balasan siap!
+            </div>
 
-            <button class="btn text-link" onclick="toggleManual('join-manual-answer')">Atau salin kode balasan
-                manual</button>
+            <button class="btn download" onclick="downloadTicket('answer')">
+                📥 Unduh Tiket Balasan
+            </button>
+
+            <button class="btn text-link" onclick="toggleManual('join-manual-answer')">
+                Atau salin kode balasan
+            </button>
             <div id="join-manual-answer" class="manual-area">
-                <p style="font-size:0.8rem; margin:0 0 5px 0;">Salin kode balasan ini:</p>
+                <p>Salin kode balasan ini:</p>
                 <textarea id="join-answer-text" readonly onclick="this.select()"></textarea>
             </div>
 
-            <p class="subtitle" style="margin-top:1rem;">Menunggu Host memproses...</p>
+            <div class="waiting-animation" style="margin-top: 1rem;">
+                <div class="radar-container">
+                    <div class="radar-wave"></div>
+                    <div class="radar-wave"></div>
+                    <div class="radar-wave"></div>
+                    <div class="radar-center"></div>
+                </div>
+                <p class="waiting-text">Menunggu pengirim memproses...</p>
+            </div>
         </div>
 
         <!-- CHAT ROOM -->
         <div id="step-chat" class="step">
+            <div class="connected-badge" style="justify-content: center; margin-bottom: 1rem;">
+                <span class="connected-dot"></span>
+                Terhubung - Siap kirim file!
+            </div>
+
             <div class="chat-container" id="chat-zone">
                 <div class="chat-messages" id="msgs">
                     <div class="msg system">
-                        ✅ <b>Koneksi Berhasil!</b><br>
-                        Silakan Chat, Drag File, atau Paste Gambar.
+                        ✅ <b>Berhasil terhubung!</b><br>
+                        Kirim pesan, tarik file, atau paste gambar.
                     </div>
                 </div>
                 <div class="chat-input">
-                    <input type="text" id="msgInput" placeholder="Ketik pesan..."
+                    <input type="text" id="msgInput" placeholder="Tulis pesan..."
                         onkeypress="if(event.key==='Enter') sendMsg()">
-                    <button class="btn" style="width: auto; padding: 5px 15px; margin:0;" onclick="sendMsg()">➤</button>
+                    <button class="btn send-btn" onclick="sendMsg()">➤</button>
                 </div>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 1rem;">
-                <button class="btn secondary" onclick="document.getElementById('fileTransferInput').click()">📎 Kirim
-                    File</button>
-                <button class="btn secondary" style="border-color: #ef4444; color: #ef4444;"
-                    onclick="resetApp()">Keluar</button>
+            <div class="action-row">
+                <button class="btn secondary" onclick="document.getElementById('fileTransferInput').click()">
+                    📎 Kirim File
+                </button>
+                <button class="btn danger" onclick="resetApp()">
+                    Keluar
+                </button>
             </div>
             <input type="file" id="fileTransferInput" multiple onchange="sendFileTransferManual()">
         </div>
     </div>
 
     <!-- Modular JavaScript -->
+    <script src="js/entrance.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/file-transfer.js"></script>
     <script src="js/input-handlers.js"></script>

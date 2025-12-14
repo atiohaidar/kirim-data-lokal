@@ -8,32 +8,76 @@
 // ========================================
 
 /**
- * Show a specific step and hide others
+ * Show a specific step with animation
  * @param {string} id - The ID of the step to show
+ * @param {string} direction - Animation direction: 'right' (default) or 'left'
  */
-function showStep(id) {
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+function showStep(id, direction = 'right') {
+    const steps = document.querySelectorAll('.step');
+    const newStep = document.getElementById(id);
+
+    if (!newStep) return;
+
+    // Get current active step
+    const currentActive = document.querySelector('.step.active');
+
+    if (currentActive && currentActive.id !== id) {
+        // Exit animation for current step
+        currentActive.style.animation = direction === 'right'
+            ? 'slideOutLeft 0.3s ease-out forwards'
+            : 'slideOutRight 0.3s ease-out forwards';
+
+        setTimeout(() => {
+            currentActive.classList.remove('active');
+            currentActive.style.animation = '';
+            currentActive.style.display = 'none';
+        }, 280);
+
+        // Enter animation for new step
+        setTimeout(() => {
+            newStep.style.display = 'block';
+            newStep.classList.add('active');
+            newStep.style.animation = direction === 'right'
+                ? 'slideInRight 0.4s ease-out forwards'
+                : 'slideInLeft 0.4s ease-out forwards';
+        }, 150);
+    } else {
+        // First load - just show with fade
+        steps.forEach(s => {
+            s.classList.remove('active');
+            s.style.display = 'none';
+        });
+        newStep.style.display = 'block';
+        newStep.classList.add('active');
+        newStep.style.animation = 'fadeInUp 0.5s ease-out forwards';
+    }
 }
 
 /**
- * Reset/reload the application
+ * Reset/reload the application with confirmation
  */
 function resetApp() {
-    window.location.reload();
+    if (confirm('Yakin mau keluar?')) {
+        window.location.reload();
+    }
 }
 
 /**
- * Auto-scroll chat to bottom
+ * Auto-scroll chat to bottom with smooth scroll
  * @param {string} containerId - The ID of the chat container
  */
 function autoScroll(containerId = 'chat-box') {
     const box = document.getElementById(containerId);
-    if (box) box.scrollTop = box.scrollHeight;
+    if (box) {
+        box.scrollTo({
+            top: box.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
 }
 
 /**
- * Log a message to the chat box
+ * Log a message to the chat box with animation
  * @param {string} msg - The message content (can be HTML)
  * @param {string} type - Message type: 'me', 'peer', or 'system'
  * @param {string} containerId - The ID of the chat container
@@ -45,7 +89,17 @@ function log(msg, type = 'system', containerId = 'chat-box') {
     const d = document.createElement('div');
     d.className = `msg ${type}`;
     d.innerHTML = msg;
+
+    // Animation is handled by CSS
     box.appendChild(d);
+
+    // Show success effect for sent messages
+    if (type === 'me' && typeof showConfetti === 'function') {
+        // Small confetti burst for sent messages
+        const rect = d.getBoundingClientRect();
+        // showConfetti(rect.left + rect.width / 2, rect.top); // Optional: uncomment for confetti on each message
+    }
+
     autoScroll(containerId);
 }
 
@@ -74,6 +128,11 @@ function triggerFileInput(inputId) {
     document.getElementById(inputId).click();
 }
 
+// Alias for legacy code
+function triggerUpload(inputId) {
+    triggerFileInput(inputId);
+}
+
 /**
  * Generate a unique file ID
  * @returns {string} Unique ID
@@ -95,16 +154,62 @@ function generateId() {
 }
 
 /**
- * Copy text to clipboard
+ * Copy text to clipboard with toast notification
  * @param {string} text - Text to copy
  * @param {string} successMessage - Message to show on success
  */
-function copyToClipboard(text, successMessage = "Disalin!") {
+function copyToClipboard(text, successMessage = "Berhasil disalin! 📋") {
     navigator.clipboard.writeText(text).then(() => {
-        alert(successMessage);
+        // Use toast if available, otherwise fallback to alert
+        if (typeof showSuccessToast === 'function') {
+            showSuccessToast(successMessage);
+        } else {
+            showToast(successMessage);
+        }
     }).catch(err => {
-        console.error('Failed to copy:', err);
+        console.error('Gagal menyalin:', err);
+        showToast('Gagal menyalin teks');
     });
+}
+
+/**
+ * Simple toast notification fallback
+ * @param {string} message - Message to display
+ */
+function showToast(message) {
+    // Check if showSuccessToast exists
+    if (typeof showSuccessToast === 'function') {
+        showSuccessToast(message);
+        return;
+    }
+
+    // Fallback toast
+    const existing = document.querySelector('.copy-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'copy-toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        z-index: 9999;
+        animation: fadeInUp 0.4s ease-out;
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease-out forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
 }
 
 // ========================================
@@ -112,12 +217,37 @@ function copyToClipboard(text, successMessage = "Disalin!") {
 // ========================================
 
 /**
- * Toggle visibility of an element
+ * Toggle visibility of an element with animation
  * @param {string} id - Element ID to toggle
  */
 function toggleVisibility(id) {
     const el = document.getElementById(id);
-    if (el) {
-        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    if (!el) return;
+
+    if (el.style.display === 'block') {
+        el.style.animation = 'fadeOut 0.2s ease-out forwards';
+        setTimeout(() => {
+            el.style.display = 'none';
+            el.style.animation = '';
+        }, 200);
+    } else {
+        el.style.display = 'block';
+        el.style.animation = 'fadeInUp 0.3s ease-out forwards';
     }
+}
+
+// Alias for legacy code
+function toggleManual(id) {
+    toggleVisibility(id);
+}
+
+// ========================================
+// SHOW/FUNCTION ALIASES FOR NATIVE.HTML
+// ========================================
+
+/**
+ * Alias for showStep used in native.html
+ */
+function show(id) {
+    showStep(id);
 }

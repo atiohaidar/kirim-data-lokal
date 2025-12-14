@@ -1,0 +1,502 @@
+/* ========================================
+   Kirim Data - Animation Library
+   All keyframe animations and utilities
+   ======================================== */
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+
+/* --- Fade Animations --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* --- Slide Animations --- */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+}
+
+/* --- Scale Animations --- */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes scaleOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    70% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- Pulse & Glow --- */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px var(--glow-color, rgba(99, 102, 241, 0.5));
+    }
+
+    50% {
+        box-shadow: 0 0 25px var(--glow-color, rgba(99, 102, 241, 0.8)),
+            0 0 50px var(--glow-color, rgba(99, 102, 241, 0.4));
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+/* --- Radar/Wave Animation --- */
+@keyframes radar {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes wave {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* --- Float Animation --- */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* --- Shake Animation --- */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+/* --- Bounce Animation --- */
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+        animation-timing-function: ease-out;
+    }
+
+    50% {
+        transform: translateY(-15px);
+        animation-timing-function: ease-in;
+    }
+}
+
+/* --- Spin Animation --- */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Ripple Animation --- */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* --- Success/Confetti Burst --- */
+@keyframes burst {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* --- Gradient Background --- */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* --- Flying Message --- */
+@keyframes flyUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes flyIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* --- Typewriter/Reveal --- */
+@keyframes revealText {
+    from {
+        clip-path: inset(0 100% 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+/* ========================================
+   ANIMATION UTILITY CLASSES
+   ======================================== */
+
+/* Duration */
+.anim-fast {
+    animation-duration: 0.2s !important;
+}
+
+.anim-normal {
+    animation-duration: 0.4s !important;
+}
+
+.anim-slow {
+    animation-duration: 0.6s !important;
+}
+
+.anim-slower {
+    animation-duration: 1s !important;
+}
+
+/* Delay classes */
+.anim-delay-1 {
+    animation-delay: 0.1s;
+}
+
+.anim-delay-2 {
+    animation-delay: 0.2s;
+}
+
+.anim-delay-3 {
+    animation-delay: 0.3s;
+}
+
+.anim-delay-4 {
+    animation-delay: 0.4s;
+}
+
+.anim-delay-5 {
+    animation-delay: 0.5s;
+}
+
+.anim-delay-6 {
+    animation-delay: 0.6s;
+}
+
+/* Fill mode */
+.anim-fill {
+    animation-fill-mode: both;
+}
+
+/* Animation classes */
+.animate-fadeIn {
+    animation: fadeIn 0.4s ease-out both;
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.animate-fadeInDown {
+    animation: fadeInDown 0.5s ease-out both;
+}
+
+.animate-slideInRight {
+    animation: slideInRight 0.4s ease-out both;
+}
+
+.animate-slideInLeft {
+    animation: slideInLeft 0.4s ease-out both;
+}
+
+.animate-scaleIn {
+    animation: scaleIn 0.3s ease-out both;
+}
+
+.animate-popIn {
+    animation: popIn 0.4s ease-out both;
+}
+
+.animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-bounce {
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Hover animation triggers */
+.hover-glow:hover {
+    animation: glow 1s ease-in-out infinite;
+}
+
+.hover-bounce:hover {
+    animation: bounce 0.5s ease-in-out;
+}
+
+.hover-shake:hover {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* ========================================
+   TRANSITION UTILITIES  
+   ======================================== */
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease;
+}
+
+.transition-opacity {
+    transition: opacity 0.3s ease;
+}
+
+.transition-colors {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

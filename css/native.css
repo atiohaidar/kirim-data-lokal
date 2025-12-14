@@ -5,54 +5,156 @@
 
 /* --- Drop Zone --- */
 .drop-zone {
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
-    padding: 2rem;
-    margin: 1rem 0;
-    transition: all 0.2s;
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 1.5rem 0;
     cursor: pointer;
-    background: #f1f5f9;
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
 }
 
+.drop-zone::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+    border-radius: 50%;
+    transition: all 0.4s ease;
+    pointer-events: none;
+}
+
+.drop-zone:hover,
 .drop-zone.highlight {
     border-color: var(--primary);
-    background: #eff6ff;
+    background: rgba(99, 102, 241, 0.05);
+    transform: translateY(-2px);
+    box-shadow: var(--glow-primary);
+}
+
+.drop-zone:hover::before,
+.drop-zone.highlight::before {
+    width: 200px;
+    height: 200px;
 }
 
 .drop-zone p {
     margin: 0;
     pointer-events: none;
+    color: var(--text-secondary);
 }
 
 .icon-large {
-    font-size: 2rem;
+    font-size: 3rem;
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    animation: float 3s ease-in-out infinite;
 }
 
 /* --- Manual Text Area --- */
 .manual-area {
     display: none;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--border);
-    padding-top: 1rem;
     text-align: left;
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.manual-area p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
 }
 
 /* --- Loader --- */
 .loader {
-    font-size: 2rem;
-    animation: pulse 1s infinite;
+    font-size: 3rem;
+    animation: bounce 1s ease-in-out infinite;
 }
 
-@keyframes pulse {
+/* --- Step Header --- */
+.step h3 {
+    font-size: 1rem;
+    color: var(--primary-light);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
 
-    0%,
-    100% {
-        opacity: 1;
-    }
+/* --- Divider --- */
+.step-divider {
+    margin: 1.5rem 0;
+    border: none;
+    border-top: 1px solid var(--border);
+}
 
-    50% {
-        opacity: 0.5;
-    }
+/* --- Ticket Status --- */
+.ticket-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 1rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    color: var(--success);
+    font-weight: 500;
+    animation: scaleIn 0.4s ease-out;
+}
+
+.ticket-status .icon {
+    font-size: 1.5rem;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+/* --- Waiting Animation --- */
+.waiting-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+}
+
+.waiting-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* --- Exit Button (Danger) --- */
+.btn.danger {
+    background: transparent;
+    border: 2px solid var(--error);
+    color: var(--error);
+    box-shadow: none;
+}
+
+.btn.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.btn.danger::before {
+    display: none;
+}
+
+/* --- Action Buttons Row --- */
+.action-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.action-row .btn {
+    flex: 1;
+    margin-bottom: 0;
 }

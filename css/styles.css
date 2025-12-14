@@ -3,28 +3,158 @@
    Styles specific to index.html (PeerJS + QR)
    ======================================== */
 
-/* --- QR & ID Display --- */
+/* --- QR Container --- */
 .qr-container {
     display: flex;
     justify-content: center;
-    margin: 1rem 0;
+    align-items: center;
+    margin: 1.5rem 0;
+    min-height: 200px;
+    position: relative;
 }
 
+.qr-container canvas,
+.qr-container img {
+    border-radius: 12px;
+    animation: scaleIn 0.5s ease-out;
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+}
+
+/* QR Glow effect */
+.qr-container::before {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: var(--primary);
+    border-radius: 12px;
+    opacity: 0.2;
+    filter: blur(30px);
+    animation: pulse 3s ease-in-out infinite;
+    z-index: -1;
+}
+
+/* --- ID Display --- */
 .id-display {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
-    letter-spacing: 5px;
+    letter-spacing: 8px;
     text-align: center;
-    color: var(--text);
-    margin: 0.5rem 0;
+    background: linear-gradient(135deg, var(--text) 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 1rem 0;
     cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.id-display:hover {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-light) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    transform: scale(1.02);
+}
+
+.id-display::after {
+    content: '📋 Klik untuk salin';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    -webkit-text-fill-color: var(--text-muted);
+    letter-spacing: 0;
+    font-weight: 400;
+}
+
+.id-display:hover::after {
+    opacity: 1;
 }
 
 /* --- Scanner --- */
 #reader {
     width: 100%;
-    border-radius: 8px;
+    border-radius: 16px;
     overflow: hidden;
     margin-bottom: 1rem;
     display: none;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+#reader video {
+    border-radius: 16px;
+}
+
+/* Scanner frame removed - clean camera view */
+
+/* --- Waiting Connection Status --- */
+.waiting-status {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.waiting-status .radar-container {
+    margin: 1rem auto;
+}
+
+/* --- Copy Success Toast --- */
+.copy-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.copy-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* --- Connection Status Badge --- */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.status-badge.waiting {
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.connected {
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.5s ease-in-out infinite;
 }

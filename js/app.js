@@ -16,23 +16,30 @@ let html5QrCode;
 function initHost() {
     showStep('step-host');
 
-    // Show ID Immediately
+    // Generate ID but show as "loading" state
     myId = generateId();
-    document.getElementById('my-id-display').textContent = myId;
+    const idDisplay = document.getElementById('my-id-display');
+    idDisplay.textContent = '····';
+    idDisplay.style.opacity = '0.5';
+    idDisplay.title = 'Menunggu koneksi ke server...';
 
     const qrEl = document.getElementById('qrcode');
-    qrEl.innerHTML = '<div class="spinner"></div><br><p style="text-align:center; font-size:0.9rem; color:var(--text-light)">Menghubungkan ke server...</p>';
+    qrEl.innerHTML = '<div class="spinner"></div><br><p style="text-align:center; font-size:0.9rem; color:var(--text-secondary)">Menghubungkan ke server...</p>';
 
     try {
         if (typeof Peer === 'undefined') {
-            alert("Library PeerJS tidak termuat. Cek koneksi internet anda.");
+            alert("Library PeerJS tidak termuat. Cek koneksi internet.");
             return;
         }
 
         peer = new Peer(myId, { debug: 1 });
 
         peer.on('open', (id) => {
-            document.getElementById('my-id-display').textContent = id;
+            // NOW the peer is ready - show the actual ID
+            idDisplay.textContent = id;
+            idDisplay.style.opacity = '1';
+            idDisplay.title = 'Klik untuk salin';
+
             qrEl.innerHTML = "";
 
             if (typeof QRCode === 'undefined') {
@@ -45,10 +52,15 @@ function initHost() {
                 text: id,
                 width: 180,
                 height: 180,
-                colorDark: "#2563eb",
+                colorDark: "#10b981",  // Green theme
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+
+            // Show toast that room is ready
+            if (typeof showToast === 'function') {
+                showToast('✅ Room siap! Bagikan kode ke teman.');
+            }
         });
 
         peer.on('connection', (c) => {
