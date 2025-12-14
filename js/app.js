@@ -350,6 +350,9 @@ function initHost() {
         peer.on('open', (id) => {
             statusLog('host-status-log', 'Terhubung ke server!', '✓', 'success');
 
+            // Init Video Call
+            VideoCall.init(peer);
+
             // NOW the peer is ready - show the actual ID
             idDisplay.textContent = id;
             idDisplay.style.opacity = '1';
@@ -468,6 +471,9 @@ function joinRoom() {
     const targetId = document.getElementById('join-id-input').value.trim();
     if (!targetId) return;
 
+    // Ensure scanner is off if it was running
+    stopScanner();
+
     isHost = false;
 
     // Update info panel state
@@ -489,6 +495,9 @@ function joinRoom() {
     peer = new Peer({ debug: 1 });
 
     peer.on('open', () => {
+        // Init Video Call
+        VideoCall.init(peer);
+
         statusLog('join-status-log', 'Peer ID aktif!', '✓', 'success');
         statusLog('join-status-log', `Menghubungkan ke room ${targetId}...`, '📡', 'active');
 
@@ -625,3 +634,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup paste
     setupPaste('step-chat', processFilesForSend);
 });
+
+// ========================================
+// VIDEO CALL INTEGRATION
+// ========================================
+
+// Global function to show incoming call modal (called from video-call.js)
+let pendingCall = null;
+
+function showIncomingCallModal(call) {
+    pendingCall = call;
+    document.getElementById('incoming-caller-id').textContent = 'Dari: ' + (call.peer || 'Unknown');
+    document.getElementById('incoming-call-modal').classList.add('active');
+    playReceiveSound(); // Use existing sound as ringtone
+}
+
+window.acceptCall = function () {
+    if (pendingCall) {
+        VideoCall.answerCall(pendingCall);
+        document.getElementById('incoming-call-modal').classList.remove('active');
+        pendingCall = null;
+    }
+}
+
+window.rejectCall = function () {
+    if (pendingCall) {
+        pendingCall.close();
+        document.getElementById('incoming-call-modal').classList.remove('active');
+        pendingCall = null;
+    }
+}

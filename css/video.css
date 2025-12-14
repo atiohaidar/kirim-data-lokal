@@ -1,0 +1,190 @@
+/* Video Call Overlay */
+.video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.video-overlay.visible {
+    display: flex;
+    opacity: 1;
+}
+
+/* Video Containers */
+.remote-video-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+video#remote-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* or contain, depending on preference */
+}
+
+.local-video-container {
+    position: absolute;
+    bottom: 100px;
+    /* Above controls */
+    right: 20px;
+    width: 120px;
+    height: 160px;
+    background: #333;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Draggable or just movable later? For now fixed */
+video#local-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    /* Mirror effect */
+}
+
+/* Controls Bar */
+.video-controls {
+    height: 80px;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.video-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-btn:active {
+    transform: scale(0.95);
+}
+
+.video-btn.off {
+    background: #ffffff;
+    color: #333;
+}
+
+.video-btn.hangup {
+    background: #ef4444;
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+}
+
+.video-btn.hangup:hover {
+    background: #dc2626;
+}
+
+/* Incoming Call Modal */
+.incoming-call-modal {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 15px 25px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.incoming-call-modal.active {
+    transform: translateX(-50%) translateY(0);
+}
+
+.caller-info {
+    color: white;
+    font-weight: 500;
+}
+
+.call-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-accept {
+    background: #10b981;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.btn-reject {
+    background: #ef4444;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.call-pulse {
+    width: 10px;
+    height: 10px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse-green 1.5s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+@media (max-width: 480px) {
+    .local-video-container {
+        width: 100px;
+        height: 140px;
+        right: 15px;
+        bottom: 90px;
+    }
+}
