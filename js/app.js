@@ -453,7 +453,15 @@ function stopScanner() {
             html5QrCode.clear();
             document.getElementById('reader').style.display = 'none';
             document.getElementById('btn-scan').style.display = 'block';
-        }).catch(err => console.error("Failed to stop scanner", err));
+            html5QrCode = null;
+        }).catch(err => {
+            console.warn("Scanner stop warning:", err);
+            // If it fails to stop (e.g. already stopped), we still want to cleanup UI if possible
+            try { html5QrCode.clear(); } catch (e) { }
+            document.getElementById('reader').style.display = 'none';
+            document.getElementById('btn-scan').style.display = 'block';
+            html5QrCode = null;
+        });
     }
 }
 

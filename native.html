@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/native.css">
+    <link rel="stylesheet" href="css/native.css">
+    <link rel="stylesheet" href="css/video.css">
     <link rel="stylesheet" href="css/info-panel.css">
 </head>
 
@@ -187,29 +189,34 @@
                         </div>
                     </div>
                     <div class="chat-input">
-                        <input type="text" id="msgInput" placeholder="Tulis pesan..."
-                            onkeypress="if(event.key==='Enter') sendMsg()">
-                        <button class="btn send-btn" onclick="sendMsg()">➤</button>
+                        <div class="chat-input">
+                            <input type="text" id="msgInput" placeholder="Tulis pesan..."
+                                onkeypress="if(event.key==='Enter') sendMsg()">
+                            <button class="btn btn-video" onclick="NativeVideo.startCall()"
+                                title="Video Call">📹</button>
+                            <button class="btn send-btn" onclick="sendMsg()">➤</button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="action-row">
-                    <button class="btn secondary" onclick="document.getElementById('fileTransferInput').click()">
-                        📎 Kirim File
-                    </button>
-                    <!-- Toggle Button for Info Panel -->
-                    <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()"
-                        style="width: auto;">
-                        <span>📊 Info</span>
-                    </button>
-                    <button class="btn danger" onclick="resetApp()">
-                        Keluar
-                    </button>
+                    <div class="action-row">
+                        <button class="btn secondary" onclick="document.getElementById('fileTransferInput').click()">
+                            📎 Kirim File
+                        </button>
+                        <!-- Toggle Button for Info Panel -->
+                        <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()"
+                            style="width: auto;">
+                            <span>📊 Info</span>
+                        </button>
+                        <button class="btn danger" onclick="resetApp()">
+                            Keluar
+                        </button>
+                    </div>
+                    <input type="file" id="fileTransferInput" multiple onchange="sendFileTransferManual()">
                 </div>
-                <input type="file" id="fileTransferInput" multiple onchange="sendFileTransferManual()">
             </div>
-        </div>
 
+
+        </div>
         <!-- Information Panel -->
         <div class="info-panel" id="info-panel">
             <div class="info-panel-header">
@@ -280,6 +287,33 @@
                 </div>
             </div>
         </div>
+        <!-- Video Call Overlay -->
+        <div id="video-overlay" class="video-overlay">
+            <div class="remote-video-container">
+                <video id="remote-video" autoplay playsinline></video>
+                <div class="local-video-container">
+                    <video id="local-video" autoplay muted playsinline></video>
+                </div>
+            </div>
+            <div class="video-controls">
+                <button id="btn-toggle-mic" class="video-btn" onclick="NativeVideo.toggleAudio()">🎤</button>
+                <button id="btn-hangup" class="video-btn hangup" onclick="NativeVideo.endCall()">📞</button>
+                <button id="btn-toggle-cam" class="video-btn" onclick="NativeVideo.toggleVideo()">📹</button>
+            </div>
+        </div>
+
+        <!-- Incoming Call Modal -->
+        <div id="incoming-call-modal" class="incoming-call-modal">
+            <div class="call-pulse"></div>
+            <div class="caller-info">
+                <div>📞 Panggilan Masuk...</div>
+                <div style="font-size: 0.8em; opacity: 0.8;" id="incoming-caller-id">Teman</div>
+            </div>
+            <div class="call-actions">
+                <button class="btn-reject" onclick="rejectNativeCall()">✖</button>
+                <button class="btn-accept" onclick="acceptNativeCall()">✔</button>
+            </div>
+        </div>
     </div>
 
     <!-- Copy Toast Notification -->
@@ -288,6 +322,7 @@
     <!-- Modular JavaScript -->
     <script src="js/entrance.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/native-video.js"></script>
     <script src="js/file-transfer.js"></script>
     <script src="js/input-handlers.js"></script>
     <script src="js/native-app.js"></script>

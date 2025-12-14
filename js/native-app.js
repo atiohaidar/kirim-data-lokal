@@ -238,11 +238,15 @@ function handleDataChannelMessage(e) {
                 handleIncomingFileMeta(msg, 'msgs');
 
             } else if (msg.type === 'file-chunk') {
-                // File chunk (maybe Base64)
+                // File chunk
                 if (msg.isBase64 && typeof msg.data === 'string') {
                     msg.data = base64ToArrayBuffer(msg.data);
                 }
                 handleIncomingFileChunk(msg, 'msgs');
+
+            } else if (msg.type && msg.type.startsWith('video-')) {
+                // Video Signaling
+                NativeVideo.handleSignal(msg);
 
             } else {
                 // Parsed as JSON but unknown type, likely chat?
@@ -528,3 +532,38 @@ function setupNativePaste() {
         }
     };
 }
+
+// ========================================
+// VIDEO SIGNALING & GLOBAL HELPERS
+// ========================================
+
+function showIncomingCallModal(callerName) {
+    document.getElementById('incoming-caller-id').textContent = callerName;
+    document.getElementById('incoming-call-modal').classList.add('active');
+    // We can play sound here if available
+    try { playTone(523, 0.5, 'sine'); setTimeout(() => playTone(659, 0.5, 'sine'), 400); } catch (e) { }
+}
+
+window.acceptNativeCall = function () {
+    NativeVideo.acceptCall();
+    document.getElementById('incoming-call-modal').classList.remove('active');
+}
+
+window.rejectNativeCall = function () {
+    NativeVideo.endCall(); // Or reject signal
+    document.getElementById('incoming-call-modal').classList.remove('active');
+}
+
+// Ensure track listener is setup when PC is created
+const originalInitHost = initHostConnection;
+initHostConnection = async function () {
+    await originalInitHost();
+    setupTrackListener();
+};
+
+const originalStartJoiner = startJoiner;
+startJoiner = function () {
+    originalStartJoiner();
+    setupTrackListener();
+};
+
