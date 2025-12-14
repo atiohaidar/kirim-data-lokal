@@ -139,19 +139,22 @@
                     Terhubung
                 </div>
 
-                <div class="chat-box" id="chat-box"></div>
+                <!-- Unified Chat Container -->
+                <div class="chat-container">
+                    <div class="chat-box" id="chat-box"></div>
 
-                <!-- Drag & Drop Overlay -->
-                <div id="drag-overlay" class="drag-overlay" style="display: none;">
-                    <div class="drag-content">
-                        <span class="emoji">📂</span>
-                        Lepaskan file di sini
+                    <!-- Drag & Drop Overlay -->
+                    <div id="drag-overlay" class="drag-overlay" style="display: none;">
+                        <div class="drag-content">
+                            <span class="emoji">📂</span>
+                            Lepaskan file di sini
+                        </div>
                     </div>
-                </div>
 
-                <div class="input-group">
-                    <input type="text" id="msg-input" placeholder="Tulis pesan..." onkeypress="handleKey(event)">
-                    <button class="btn send-btn" onclick="sendMsg()">➤</button>
+                    <div class="chat-input">
+                        <input type="text" id="msg-input" placeholder="Tulis pesan..." onkeypress="handleKey(event)">
+                        <button class="btn send-btn" onclick="sendMsg()">➤</button>
+                    </div>
                 </div>
 
                 <label for="fileInput">📎 Kirim file (klik, drag & drop, atau paste)</label>

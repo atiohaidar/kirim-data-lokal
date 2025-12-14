@@ -18,8 +18,9 @@
     position: relative;
 }
 
-/* Standalone chat-box (for index.html) */
+/* Standalone chat-box (fallback for legacy or standalone usage) */
 .chat-box {
+    /* Default standalone styles */
     height: 400px;
     min-height: 300px;
     max-height: 500px;
@@ -32,6 +33,20 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     margin-bottom: 1rem;
+}
+
+/* Chat box identifying as chat-messages inside a container */
+.chat-container .chat-box,
+.chat-container .chat-messages {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    margin-bottom: 0;
+    border: none;
+    background: linear-gradient(180deg, rgba(20, 20, 35, 0.5) 0%, rgba(15, 15, 25, 0.8) 100%);
+    border-radius: 0;
+    /* Reset radius as it acts as inner content */
 }
 
 /* Chat messages inside container (for native.html) */
