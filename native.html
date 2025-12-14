@@ -176,42 +176,50 @@
 
             <!-- CHAT ROOM -->
             <div id="step-chat" class="step">
-                <div class="connected-badge" style="justify-content: center; margin-bottom: 1rem;">
+                <div class="connected-badge">
                     <span class="connected-dot"></span>
                     Terhubung - Siap kirim file!
                 </div>
 
                 <div class="chat-container" id="chat-zone">
-                    <div class="chat-messages" id="msgs">
+                    <div class="chat-box" id="msgs">
                         <div class="msg system">
                             ✅ <b>Berhasil terhubung!</b><br>
                             Kirim pesan, tarik file, atau paste gambar.
                         </div>
                     </div>
-                    <div class="chat-input">
-                        <div class="chat-input">
-                            <input type="text" id="msgInput" placeholder="Tulis pesan..."
-                                onkeypress="if(event.key==='Enter') sendMsg()">
-                            <button class="btn btn-video" onclick="NativeVideo.startCall()"
-                                title="Video Call">📹</button>
-                            <button class="btn send-btn" onclick="sendMsg()">➤</button>
+
+                    <!-- Drag & Drop Overlay -->
+                    <div id="drag-overlay" class="drag-overlay" style="display: none;">
+                        <div class="drag-content">
+                            <span class="emoji">📂</span>
+                            Lepaskan file di sini
                         </div>
                     </div>
 
-                    <div class="action-row">
-                        <button class="btn secondary" onclick="document.getElementById('fileTransferInput').click()">
-                            📎 Kirim File
-                        </button>
-                        <!-- Toggle Button for Info Panel -->
-                        <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()"
-                            style="width: auto;">
-                            <span>📊 Info</span>
-                        </button>
-                        <button class="btn danger" onclick="resetApp()">
-                            Keluar
-                        </button>
+                    <div class="chat-input">
+                        <input type="text" id="msgInput" placeholder="Tulis pesan..."
+                            onkeypress="if(event.key==='Enter') sendMsg()">
+                        <button class="btn btn-video" onclick="NativeVideo.startCall()" title="Video Call">📹</button>
+                        <button class="btn send-btn" onclick="sendMsg()">➤</button>
                     </div>
-                    <input type="file" id="fileTransferInput" multiple onchange="sendFileTransferManual()">
+                </div>
+
+                <label for="fileTransferInput">📎 Kirim file (klik, drag & drop, atau paste)</label>
+                <input type="file" id="fileTransferInput" multiple style="display: none;"
+                    onchange="sendFileTransferManual()">
+
+                <!-- Toggle Button for Info Panel -->
+                <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()">
+                    <span>📊 Tampilkan Informasi</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn secondary danger" onclick="resetApp()"
+                        style="width: auto; padding: 8px 20px; font-size: 0.85rem;">
+                        Keluar Room
+                    </button>
                 </div>
             </div>
 
@@ -296,6 +304,10 @@
                 </div>
             </div>
             <div class="video-controls">
+                <!-- <button id="btn-quality" class="video-btn" onclick="NativeVideo.toggleQuality()"
+                    title="Ganti Kualitas (Eco/HD)">⚡</button> -->
+                <button id="btn-switch-cam" class="video-btn" onclick="NativeVideo.switchCamera()"
+                    title="Ganti Kamera">🔄</button>
                 <button id="btn-toggle-mic" class="video-btn" onclick="NativeVideo.toggleAudio()">🎤</button>
                 <button id="btn-hangup" class="video-btn hangup" onclick="NativeVideo.endCall()">📞</button>
                 <button id="btn-toggle-cam" class="video-btn" onclick="NativeVideo.toggleVideo()">📹</button>

@@ -71,16 +71,23 @@ function updateActivityLogUI() {
     if (!container) return;
 
     if (infoState.logs.length === 0) {
-        container.innerHTML = '<div class="empty-log">Belum ada aktivitas</div>';
-        return;
+        container.innerHTML = '';
+        // Remove empty state if present
     }
 
-    container.innerHTML = infoState.logs.map(log => `
+    const log = infoState.logs[0]; // Get newest
+    const html = `
         <div class="log-entry ${log.type}">
             <span class="log-time">[${log.time}]</span>
             <span class="log-message">${log.message}</span>
         </div>
-    `).join('');
+    `;
+    container.insertAdjacentHTML('afterbegin', html);
+
+    // Prune old logs from DOM if too many
+    if (container.children.length > 50) {
+        container.lastElementChild.remove();
+    }
 }
 
 function updateStatusUI() {
@@ -192,8 +199,10 @@ function setupDataChannel(channel) {
         });
 
         showStep('step-chat');
-        setupNativeDragDrop();
-        setupNativePaste();
+
+        // Initialize shared input handlers
+        setupDragAndDrop('chat-zone', 'drag-overlay', handleNativeFiles);
+        setupPaste('step-chat', handleNativeFiles);
 
         // Info Panel Hooks
         if (typeof infoState !== 'undefined') {
@@ -241,12 +250,16 @@ function handleDataChannelMessage(e) {
 
             } else if (msg.type === 'file-meta') {
                 // New chunked meta
+                // Track current ID for binary chunks
+                if (msg.fileId) {
+                    incomingFiles.currentId = msg.fileId;
+                }
                 handleIncomingFileMeta(msg, 'msgs');
 
             } else if (msg.type === 'file-chunk') {
-                // File chunk
+                // Should not happen in optimized binary mode, but keep for fallback
                 if (msg.isBase64 && typeof msg.data === 'string') {
-                    msg.data = base64ToArrayBuffer(msg.data);
+                    // Legacy/Fallback
                 }
                 handleIncomingFileChunk(msg, 'msgs');
 
@@ -266,20 +279,22 @@ function handleDataChannelMessage(e) {
             trackMsgRecv(data);
         }
     }
-    // 2. Binary Data (Legacy)
+    // 2. Binary Data (Optimized Raw Transfer)
     else {
         const currentId = incomingFiles.currentId;
         if (currentId && incomingFiles[currentId]) {
+            // Assume ordered delivery via WebRTC
             const task = incomingFiles[currentId];
-            task.buffer.push(data);
-            task.received += data.byteLength;
+            const nextIndex = task.chunks.length;
 
-            if (task.received >= task.meta.size) {
-                finishLegacyFileReceive(task);
-                delete incomingFiles[currentId];
-                incomingFiles.currentId = null;
-                trackFileRecv(task.meta.name, task.meta.size);
-            }
+            // Create synthetic chunk object for the shared handler
+            const syntheticChunk = {
+                fileId: currentId,
+                chunkIndex: nextIndex,
+                data: data // ArrayBuffer
+            };
+
+            handleIncomingFileChunk(syntheticChunk, 'msgs');
         }
     }
 }
@@ -419,54 +434,25 @@ function logNative(txt, type) {
 // FILE TRANSFER
 // ========================================
 
-/**
- * Helper: Convert ArrayBuffer to Base64
- * Needed because JSON.stringify cannot handle raw ArrayBuffers
- */
-function arrayBufferToBase64(buffer) {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-}
 
-/**
- * Helper: Convert Base64 to ArrayBuffer
- */
-function base64ToArrayBuffer(base64) {
-    const binary_string = atob(base64);
-    const len = binary_string.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
 
 function processFileToSend(file) {
     if (!dc || dc.readyState !== 'open') return alert("Koneksi belum siap!");
 
     // Use new chunked transfer with progress
-    sendFileWithProgress(file, (data) => {
-        if (typeof data === 'object') {
-            // If it's a file chunk, we must Base64 encode the binary data
-            // because standard JSON cannot serialize ArrayBuffers.
-            if (data.type === 'file-chunk' && data.data instanceof ArrayBuffer) {
-                const base64Data = arrayBufferToBase64(data.data);
-                const safePacket = {
-                    ...data,
-                    data: base64Data,
-                    isBase64: true
-                };
-                dc.send(JSON.stringify(safePacket));
+    sendFileWithProgress(file, dc, (data) => {
+        if (typeof data === 'object' && data.type === 'file-chunk') {
+            // OPTIMIZATION: Send raw binary buffer directly
+            // Skip JSON wrapping to avoid Base64 overhead
+            if (data.data instanceof ArrayBuffer) {
+                dc.send(data.data);
             } else {
-                dc.send(JSON.stringify(data));
+                // Fallback? Should be arraybuffer
+                dc.send(data.data);
             }
         } else {
-            dc.send(data);
+            // Metadata is still JSON
+            dc.send(JSON.stringify(data));
         }
     }, 'msgs');
 }
@@ -478,66 +464,19 @@ function sendFileTransferManual() {
     }
 }
 
-function finishLegacyFileReceive(task) {
-    const blob = new Blob(task.buffer, { type: task.meta.type });
-    const url = URL.createObjectURL(blob);
-    const div = document.createElement('div');
-    div.className = 'msg peer';
+// Helper removed (finishLegacyFileReceive) as we now use shared handleIncomingFileChunk
 
-    if (task.meta.type.startsWith('image/')) {
-        div.style.background = 'transparent';
-        div.style.padding = '0';
-        div.innerHTML = `<img src="${url}" style="max-width:100%; border-radius:8px; display:block;">
-                         <a href="${url}" download="${task.meta.name}" class="file-link" style="margin-top:5px; display:block; font-size:0.8rem;">💾 Simpan Gambar</a>`;
-    } else if (task.meta.type.startsWith('video/')) {
-        div.style.background = 'transparent';
-        div.style.padding = '0';
-        div.innerHTML = `<video src="${url}" controls style="max-width:100%; border-radius:8px; display:block;"></video>
-                         <a href="${url}" download="${task.meta.name}" class="file-link" style="margin-top:5px; display:block; font-size:0.8rem;">💾 Simpan Video</a>`;
-    } else {
-        div.innerHTML = `📂 <b>File Diterima:</b><br><a href="${url}" download="${task.meta.name}" style="color:#2563eb; font-weight:bold;">${task.meta.name}</a>`;
-    }
-    document.getElementById('msgs').appendChild(div);
-    autoScroll('msgs');
-}
 
 // ========================================
-// DRAG & DROP / PASTE
+// DRAG & DROP / PASTE HANDLERS
 // ========================================
 
-function setupNativeDragDrop() {
-    const zone = document.getElementById('chat-zone');
-    zone.addEventListener('dragenter', e => {
-        e.preventDefault();
-        zone.classList.add('drag-active');
-    });
-    zone.addEventListener('dragover', e => {
-        e.preventDefault();
-        zone.classList.add('drag-active');
-    });
-    zone.addEventListener('dragleave', e => {
-        e.preventDefault();
-        zone.classList.remove('drag-active');
-    });
-    zone.addEventListener('drop', e => {
-        e.preventDefault();
-        zone.classList.remove('drag-active');
-        if (e.dataTransfer.files.length > 0) {
-            Array.from(e.dataTransfer.files).forEach(file => processFileToSend(file));
-        }
-    });
+function handleNativeFiles(files) {
+    if (!files || files.length === 0) return;
+    Array.from(files).forEach(file => processFileToSend(file));
 }
 
-function setupNativePaste() {
-    document.onpaste = e => {
-        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-        for (let item of items) {
-            if (item.kind === 'file') {
-                processFileToSend(item.getAsFile());
-            }
-        }
-    };
-}
+// See setupDataChannel for initialization
 
 // ========================================
 // VIDEO SIGNALING & GLOBAL HELPERS

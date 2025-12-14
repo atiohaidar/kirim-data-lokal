@@ -15,6 +15,10 @@ function setupDragAndDrop(dropZoneId, overlayId, onFilesDropped) {
 
     if (!dropZone) return;
 
+    // OPTIMIZATION: Prevent duplicate listeners
+    if (dropZone.dataset.listenersAttached === 'true') return;
+    dropZone.dataset.listenersAttached = 'true';
+
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, preventDefaults, false);
     });

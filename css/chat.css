@@ -13,8 +13,9 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: rgba(15, 15, 25, 0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(15, 15, 25, 0.95);
+    /* backdrop-filter removed for performance on low-end devices */
+    /* backdrop-filter: blur(10px); */
     position: relative;
 }
 

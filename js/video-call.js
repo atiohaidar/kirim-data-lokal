@@ -8,7 +8,10 @@ const VideoCall = {
     currentCall: null,
     peerInstance: null,
     isMuted: false,
+    isMuted: false,
     isCameraOff: false,
+    isEcoMode: true, // Default to Eco (VGA)
+    currentFacingMode: 'user', // 'user' or 'environment'
 
     /**
      * Initialize video call module
@@ -46,7 +49,8 @@ const VideoCall = {
     async startCall(remotePeerId) {
         try {
             // 1. Get Local Stream
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const constraints = this.getConstraints();
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             this.localStream = stream;
 
             // 2. Show Video UI
@@ -70,7 +74,8 @@ const VideoCall = {
     async answerCall(call) {
         try {
             // 1. Get Local Stream
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const constraints = this.getConstraints();
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             this.localStream = stream;
 
             // 2. Answer the call with our stream
@@ -194,5 +199,81 @@ const VideoCall = {
     displayRemoteVideo(stream) {
         const video = document.getElementById('remote-video');
         video.srcObject = stream;
+    },
+
+    // --- Advanced Camera Controls ---
+
+    getConstraints() {
+        // Eco Mode: VGA (640x480) @ 15fps - Hemat Baterai & Data
+        // HD Mode: HD (1280x720) @ 30fps
+        const videoConstraints = this.isEcoMode
+            ? { width: 640, height: 480, frameRate: 15, facingMode: this.currentFacingMode }
+            : { width: 1280, height: 720, frameRate: 30, facingMode: this.currentFacingMode };
+
+        return {
+            video: videoConstraints,
+            audio: { echoCancellation: true, noiseSuppression: true }
+        };
+    },
+
+    async switchCamera() {
+        if (!this.localStream) return;
+        this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
+        await this.restartStream();
+        if (typeof addActivityLog === 'function') {
+            addActivityLog('info', `📷 Kamera: ${this.currentFacingMode === 'user' ? 'Depan' : 'Belakang'}`);
+        }
+    },
+
+    async toggleQuality() {
+        if (!this.localStream) return;
+        this.isEcoMode = !this.isEcoMode;
+        await this.restartStream();
+
+        const mode = this.isEcoMode ? 'Eco (Hemat)' : 'HD (Jernih)';
+        if (typeof addActivityLog === 'function') {
+            addActivityLog('info', `⚡ Mode Video: ${mode}`);
+        }
+
+        // Update UI button text if needed, or toast
+        const btn = document.getElementById('btn-quality');
+        if (btn) btn.innerHTML = this.isEcoMode ? '⚡' : 'ᴴᴰ';
+    },
+
+    async restartStream() {
+        // 1. Stop current tracks
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(t => t.stop());
+        }
+
+        try {
+            // 2. Get new stream
+            const newStream = await navigator.mediaDevices.getUserMedia(this.getConstraints());
+            this.localStream = newStream;
+            this.displayLocalVideo(newStream);
+
+            // 3. Replace track in PeerJS Call (Seamless Switch)
+            // PeerJS wraps RTCPeerConnection in call.peerConnection
+            if (this.currentCall && this.currentCall.peerConnection) {
+                const pc = this.currentCall.peerConnection;
+                const videoTrack = newStream.getVideoTracks()[0];
+                const audioTrack = newStream.getAudioTracks()[0];
+
+                const senders = pc.getSenders();
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+
+                if (videoSender && videoTrack) await videoSender.replaceTrack(videoTrack);
+                if (audioSender && audioTrack) await audioSender.replaceTrack(audioTrack);
+            }
+
+            // Restore Mute/Video Off state
+            if (this.isMuted && newStream.getAudioTracks()[0]) newStream.getAudioTracks()[0].enabled = false;
+            if (this.isCameraOff && newStream.getVideoTracks()[0]) newStream.getVideoTracks()[0].enabled = false;
+
+        } catch (err) {
+            console.error("Camera switch failed", err);
+            alert("Gagal ganti kamera: " + err.message);
+        }
     }
 };

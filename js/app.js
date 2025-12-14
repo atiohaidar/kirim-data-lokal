@@ -98,16 +98,23 @@ function updateActivityLogUI() {
     if (!container) return;
 
     if (infoState.logs.length === 0) {
-        container.innerHTML = '<div class="empty-log">Belum ada aktivitas</div>';
+        container.innerHTML = '';
         return;
     }
 
-    container.innerHTML = infoState.logs.map(log => `
+    const log = infoState.logs[0];
+    const html = `
         <div class="log-entry ${log.type}">
             <span class="log-time">[${log.time}]</span>
             <span class="log-message">${log.message}</span>
         </div>
-    `).join('');
+    `;
+    container.insertAdjacentHTML('afterbegin', html);
+
+    // Prune
+    if (container.children.length > 50) {
+        container.lastElementChild.remove();
+    }
 }
 
 /**
@@ -632,7 +639,7 @@ function processFilesForSend(files) {
 }
 
 function sendSingleFile(file) {
-    sendFileWithProgress(file, (data) => conn.send(data));
+    sendFileWithProgress(file, conn, (data) => conn.send(data));
 }
 
 // ========================================

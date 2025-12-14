@@ -13,15 +13,19 @@ let incomingFiles = {};
 // ========================================
 
 /**
- * Send a file with chunked transfer and progress
+ * Send a file with chunked transfer and progress (Optimized with Backpressure)
  * @param {File} file - The file to send
- * @param {DataChannel|Object} connection - The connection to send through
+ * @param {RTCDataChannel} connection - The WebRTC DataChannel
  * @param {Function} sendFn - Function to send data (connection.send or dc.send)
  * @param {string} containerId - Chat container ID for logging
  */
-function sendFileWithProgress(file, sendFn, containerId = 'chat-box') {
+async function sendFileWithProgress(file, connection, sendFn, containerId = 'chat-box') {
     const fileId = generateFileId();
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+    // Backpressure threshold (e.g., 64KB - 256KB). 
+    // Keep it low enough to ensure responsiveness, high enough for throughput.
+    const BUFFER_THRESHOLD = 64 * 1024;
 
     // Show sender preview
     const url = URL.createObjectURL(file);
@@ -51,47 +55,59 @@ function sendFileWithProgress(file, sendFn, containerId = 'chat-box') {
         totalChunks: totalChunks
     });
 
-    // Read and send chunks
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const arrayBuffer = e.target.result;
-        let offset = 0;
-        let chunkIndex = 0;
+    // OPTIMIZATION: Streaming Read (Zero RAM Load)
+    // Instead of loading the entire file into memory (which crashes on large files),
+    // we read small chunks directly from disk/blob storage.
 
-        function sendNextChunk() {
-            if (offset >= arrayBuffer.byteLength) {
-                const progressEl = document.getElementById(progressId);
-                if (progressEl) progressEl.textContent = '✅ Terkirim!';
-                // Track file sent for statistics
-                if (typeof trackFileSent === 'function') {
-                    trackFileSent(file.name, file.size);
-                }
-                return;
-            }
+    let offset = 0;
+    let chunkIndex = 0;
+    const progressEl = document.getElementById(progressId);
 
-            const chunk = arrayBuffer.slice(offset, offset + CHUNK_SIZE);
-            sendFn({
-                type: 'file-chunk',
-                fileId: fileId,
-                chunkIndex: chunkIndex,
-                data: chunk
+    // Optimized Sending Loop with Streaming
+    while (offset < file.size) {
+        // 1. Backpressure Check
+        // Support both raw DataChannel (dc.bufferedAmount) and PeerJS (conn.dataChannel.bufferedAmount)
+        const getBufferedAmount = () => connection.bufferedAmount ?? connection.dataChannel?.bufferedAmount ?? 0;
+
+        if (getBufferedAmount() > BUFFER_THRESHOLD) {
+            await new Promise(resolve => {
+                const interval = setInterval(() => {
+                    if (getBufferedAmount() < BUFFER_THRESHOLD) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, 10); // Check every 10ms
             });
-
-            offset += CHUNK_SIZE;
-            chunkIndex++;
-
-            // Update progress
-            const percent = Math.min(100, Math.round((offset / file.size) * 100));
-            const progressEl = document.getElementById(progressId);
-            if (progressEl) progressEl.textContent = `⏳ Mengirim: ${percent}%`;
-
-            // Small delay to prevent overwhelming the connection
-            setTimeout(sendNextChunk, 10);
         }
 
-        sendNextChunk();
-    };
-    reader.readAsArrayBuffer(file);
+        // 2. Read ONLY the next chunk from disk
+        const slice = file.slice(offset, offset + CHUNK_SIZE);
+        const chunk = await slice.arrayBuffer();
+
+        // 3. Send
+        sendFn({
+            type: 'file-chunk',
+            fileId: fileId,
+            chunkIndex: chunkIndex,
+            data: chunk
+        });
+
+        offset += CHUNK_SIZE;
+        chunkIndex++;
+
+        // 4. Update Progress (Throttled UI update)
+        if (chunkIndex % 5 === 0 || offset >= file.size) {
+            const percent = Math.min(100, Math.round((offset / file.size) * 100));
+            if (progressEl) progressEl.textContent = `⏳ Mengirim: ${percent}%`;
+        }
+    }
+
+    // Done
+    if (progressEl) progressEl.textContent = '✅ Terkirim!';
+
+    if (typeof trackFileSent === 'function') {
+        trackFileSent(file.name, file.size);
+    }
 }
 
 // ========================================
