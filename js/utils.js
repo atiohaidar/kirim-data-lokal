@@ -58,6 +58,13 @@ function showStep(id, direction = 'right') {
  */
 function resetApp() {
     if (confirm('Yakin mau keluar?')) {
+        // Cleanup peer connection if exists
+        if (typeof conn !== 'undefined' && conn) {
+            try { conn.close(); } catch (e) { }
+        }
+        if (typeof peer !== 'undefined' && peer) {
+            try { peer.destroy(); } catch (e) { }
+        }
         window.location.reload();
     }
 }

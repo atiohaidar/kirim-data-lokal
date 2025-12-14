@@ -1,0 +1,372 @@
+/* ========================================
+   Kirim Data - Information Panel Styles
+   Responsive side/bottom panel with stats
+   ======================================== */
+
+/* --- Page Layout with Info Panel --- */
+.page-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+}
+
+/* Desktop: Side-by-side layout */
+@media (min-width: 900px) {
+    .page-layout {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .page-layout .container {
+        flex: 1;
+        max-width: 540px;
+    }
+}
+
+/* --- Toggle Button --- */
+.info-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    width: 100%;
+}
+
+.info-toggle-btn:hover {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--primary);
+    color: var(--primary-light);
+}
+
+.info-toggle-btn.active {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: var(--primary);
+    color: var(--primary-light);
+}
+
+.info-toggle-btn .toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.info-toggle-btn.active .toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* Desktop: Hide toggle button, always show panel */
+@media (min-width: 900px) {
+    .info-toggle-btn {
+        display: none;
+    }
+}
+
+/* --- Info Panel Container --- */
+.info-panel {
+    display: none;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1rem;
+    opacity: 0;
+    animation: fadeInUp 0.3s ease-out forwards;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.info-panel.visible {
+    display: block;
+}
+
+/* Desktop: Always visible in sidebar */
+@media (min-width: 900px) {
+    .info-panel {
+        display: block;
+        opacity: 1;
+        width: 320px;
+        flex-shrink: 0;
+        max-height: calc(100vh - 80px);
+        position: sticky;
+        top: 20px;
+    }
+}
+
+/* --- Panel Header --- */
+.info-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+}
+
+.info-panel-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- Info Card --- */
+.info-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.info-card:last-child {
+    margin-bottom: 0;
+}
+
+.info-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-card-header .card-icon {
+    font-size: 0.9rem;
+}
+
+/* --- Status Section --- */
+.status-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-item:last-child {
+    border-bottom: none;
+}
+
+.status-label {
+    color: var(--text-muted);
+}
+
+.status-value {
+    color: var(--text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.status-dot.connected {
+    background: var(--success);
+}
+
+.status-dot.connecting {
+    background: var(--warning);
+}
+
+.status-dot.disconnected {
+    background: var(--error);
+    animation: none;
+}
+
+/* --- Users List --- */
+.users-list {
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+}
+
+.user-item:last-child {
+    margin-bottom: 0;
+}
+
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: white;
+    font-weight: 600;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-id {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.user-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.empty-users {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 1rem;
+    font-style: italic;
+}
+
+/* --- Statistics --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-light);
+    margin-bottom: 2px;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* --- Activity Log --- */
+.activity-log {
+    max-height: 150px;
+    overflow-y: auto;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 0.75rem;
+}
+
+.log-entry {
+    display: flex;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-time {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.log-message {
+    flex: 1;
+    word-break: break-word;
+}
+
+.log-entry.success .log-message {
+    color: var(--success);
+}
+
+.log-entry.error .log-message {
+    color: var(--error);
+}
+
+.log-entry.info .log-message {
+    color: var(--primary-light);
+}
+
+.empty-log {
+    color: var(--text-muted);
+    text-align: center;
+    padding: 1rem;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* --- Scrollbar for info cards --- */
+.activity-log::-webkit-scrollbar,
+.users-list::-webkit-scrollbar,
+.info-panel::-webkit-scrollbar {
+    width: 4px;
+}
+
+.activity-log::-webkit-scrollbar-track,
+.users-list::-webkit-scrollbar-track,
+.info-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 2px;
+}
+
+.activity-log::-webkit-scrollbar-thumb,
+.users-list::-webkit-scrollbar-thumb,
+.info-panel::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* --- Connection Info Badge --- */
+.connection-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.room-id-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(16, 185, 129, 0.15);
+    border-radius: 6px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-light);
+}

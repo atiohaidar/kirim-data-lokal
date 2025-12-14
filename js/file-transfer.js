@@ -62,6 +62,10 @@ function sendFileWithProgress(file, sendFn, containerId = 'chat-box') {
             if (offset >= arrayBuffer.byteLength) {
                 const progressEl = document.getElementById(progressId);
                 if (progressEl) progressEl.textContent = '✅ Terkirim!';
+                // Track file sent for statistics
+                if (typeof trackFileSent === 'function') {
+                    trackFileSent(file.name, file.size);
+                }
                 return;
             }
 
@@ -145,6 +149,11 @@ function handleIncomingFileChunk(data, containerId = 'chat-box') {
             }
 
             progressEl.innerHTML = content;
+        }
+
+        // Track file received for statistics
+        if (typeof trackFileRecv === 'function') {
+            trackFileRecv(fileData.meta.name, fileData.meta.size);
         }
 
         // Cleanup

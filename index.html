@@ -18,14 +18,27 @@
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/chat.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/info-panel.css">
 </head>
 
 <body>
-    <!-- Splash Screen -->
+    <!-- Epic Splash Screen -->
     <div id="splash-screen" class="splash-screen">
-        <div class="splash-logo">🚀</div>
-        <div class="splash-title">Kirim Data</div>
-        <div class="splash-subtitle">Transfer file antar perangkat dengan cepat</div>
+        <!-- Zoom container -->
+        <div class="splash-content">
+            <div class="rocket-trail"></div>
+            <div class="splash-logo" id="splash-rocket">🚀</div>
+            <div class="splash-title">
+                <span class="hacker-text" data-text="Kirim Data">Kirim Data</span>
+            </div>
+            <div class="splash-subtitle">
+                <span class="typewriter" id="splash-typewriter"></span>
+                <span class="cursor">▮</span>
+            </div>
+            <div class="splash-loader">
+                <div class="loader-bar"></div>
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -55,15 +68,12 @@
             <p style="text-align: center; margin:0; font-size:0.9rem; color:var(--text-secondary);">Kode Room:</p>
             <div id="my-id-display" class="id-display" onclick="copyId()" title="Klik untuk salin">...</div>
 
-            <!-- Radar animation for waiting -->
-            <div class="waiting-status">
-                <div class="radar-container">
-                    <div class="radar-wave"></div>
-                    <div class="radar-wave"></div>
-                    <div class="radar-wave"></div>
-                    <div class="radar-center"></div>
+            <!-- Status Log - Cinematic Loading -->
+            <div class="status-log" id="host-status-log">
+                <div class="log-line">
+                    <span class="log-icon">⏳</span>
+                    <span class="log-text">Menyiapkan koneksi...</span>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Menunggu teman bergabung...</p>
             </div>
 
             <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
@@ -85,10 +95,12 @@
             <input type="text" id="join-id-input" placeholder="Masukkan kode room" maxlength="6">
             <button id="btn-join" class="btn" onclick="joinRoom()">Hubungkan</button>
 
-            <!-- Loading Indicator -->
-            <div id="join-loading" style="display: none; text-align: center; margin: 1rem 0;">
-                <div class="spinner" style="margin: 1rem auto;"></div>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Menghubungkan ke room...</p>
+            <!-- Status Log - Join Process -->
+            <div class="status-log" id="join-status-log" style="display: none;">
+                <div class="log-line active">
+                    <span class="log-icon spin">⏳</span>
+                    <span class="log-text">Menghubungkan...</span>
+                </div>
             </div>
 
             <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
@@ -119,11 +131,105 @@
             <label for="fileInput">📎 Kirim file (klik, drag & drop, atau paste)</label>
             <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(this)">
 
+            <!-- Info Panel Toggle Button (mobile) -->
+            <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()">
+                <span>📊 Tampilkan Informasi</span>
+                <span class="toggle-icon">▼</span>
+            </button>
+
             <div style="text-align: center; margin-top: 1rem;">
                 <button class="btn secondary danger" onclick="resetApp()"
                     style="width: auto; padding: 8px 20px; font-size: 0.85rem;">
                     Keluar Room
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Panel (outside container for side-by-side layout) -->
+    <div class="info-panel" id="info-panel">
+        <div class="info-panel-header">
+            <h3>📊 Informasi Tambahan</h3>
+        </div>
+
+        <!-- Status Koneksi -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <span class="card-icon">🔌</span>
+                Status Koneksi
+            </div>
+            <div class="status-item">
+                <span class="status-label">Status</span>
+                <span class="status-value" id="info-status">
+                    <span class="status-dot connecting"></span>
+                    Menunggu...
+                </span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Room ID</span>
+                <span class="status-value">
+                    <span class="room-id-badge" id="info-room-id">-</span>
+                </span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Role</span>
+                <span class="status-value" id="info-role">-</span>
+            </div>
+        </div>
+
+        <!-- User Terhubung -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <span class="card-icon">👥</span>
+                User Terhubung
+            </div>
+            <div class="users-list" id="info-users">
+                <div class="empty-users">Belum ada user terhubung</div>
+            </div>
+        </div>
+
+        <!-- Statistik Transfer -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <span class="card-icon">📈</span>
+                Statistik Transfer
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-bytes-sent">0 B</div>
+                    <div class="stat-label">Dikirim</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-bytes-recv">0 B</div>
+                    <div class="stat-label">Diterima</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-files-sent">0</div>
+                    <div class="stat-label">File Kirim</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-files-recv">0</div>
+                    <div class="stat-label">File Terima</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-msg-sent">0</div>
+                    <div class="stat-label">Pesan Kirim</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-msg-recv">0</div>
+                    <div class="stat-label">Pesan Terima</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Aktivitas -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <span class="card-icon">📝</span>
+                Log Aktivitas
+            </div>
+            <div class="activity-log" id="activity-log">
+                <div class="empty-log">Belum ada aktivitas</div>
             </div>
         </div>
     </div>

@@ -1,31 +1,87 @@
-/* ========================================
-   Kirim Data - Entrance & Effects
-   Splash screen and cinematic effects
-   ======================================== */
-
 // ========================================
-// SPLASH SCREEN
+// SPLASH SCREEN (Fast 500ms)
 // ========================================
 
 /**
- * Initialize splash screen and entrance animation
+ * Initialize splash screen - quick 500ms zoom out with page fade in
  */
 function initSplashScreen() {
     const splash = document.getElementById('splash-screen');
     if (!splash) return;
 
-    // Hide splash after animation
+    // Quick splash: zoom out + page fade in simultaneously
     setTimeout(() => {
-        splash.classList.add('hidden');
+        splash.classList.add('zoom-out');
 
-        // Trigger stagger animations on main content
-        triggerEntranceAnimations();
+        // Show main content as splash zooms out
+        document.querySelector('.container')?.classList.add('fade-in');
 
-        // Remove splash from DOM after transition
         setTimeout(() => {
-            splash.remove();
+            splash.classList.add('hidden');
+            triggerEntranceAnimations();
         }, 500);
-    }, 1500);
+    }, 500);  // Start transition after 500ms
+}
+
+/**
+ * Create matrix rain effect
+ */
+function createMatrixRain() {
+    const container = document.getElementById('matrix-rain');
+    if (!container) return;
+
+    const columns = Math.floor(window.innerWidth / 20);
+
+    for (let i = 0; i < columns; i++) {
+        setTimeout(() => {
+            createMatrixColumn(container, i);
+        }, Math.random() * 1000);
+    }
+}
+
+/**
+ * Create a single matrix column
+ */
+function createMatrixColumn(container, index) {
+    const column = document.createElement('div');
+    column.className = 'matrix-column';
+
+    // Random characters
+    const length = Math.floor(Math.random() * 20) + 10;
+    let chars = '';
+    for (let i = 0; i < length; i++) {
+        chars += MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
+    }
+    column.textContent = chars;
+
+    // Position
+    column.style.left = `${(index / Math.floor(window.innerWidth / 20)) * 100}%`;
+    column.style.animationDuration = `${Math.random() * 3 + 2}s`;
+    column.style.animationDelay = `${Math.random() * 2}s`;
+    column.style.opacity = Math.random() * 0.5 + 0.3;
+
+    container.appendChild(column);
+}
+
+/**
+ * Typewriter effect for text
+ */
+function typewriterEffect(elementId, text, speed = 50) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    let i = 0;
+    element.textContent = '';
+
+    const type = () => {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    };
+
+    type();
 }
 
 /**
@@ -37,6 +93,79 @@ function triggerEntranceAnimations() {
         el.style.animationDelay = `${index * 0.1}s`;
         el.classList.add('animate-fadeInUp');
     });
+}
+
+// ========================================
+// SOUND EFFECTS (Web Audio API - No external files)
+// ========================================
+
+let audioContext = null;
+
+/**
+ * Get or create audio context
+ */
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+}
+
+/**
+ * Play a beep sound with specified frequency and duration
+ */
+function playTone(frequency, duration, type = 'sine', volume = 0.3) {
+    try {
+        const ctx = getAudioContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = type;
+
+        gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + duration);
+    } catch (e) {
+        console.log('Audio not supported');
+    }
+}
+
+/**
+ * Sound: Connection established (happy ascending tones)
+ */
+function playConnectSound() {
+    playTone(523, 0.15, 'sine', 0.3); // C5
+    setTimeout(() => playTone(659, 0.15, 'sine', 0.3), 100); // E5
+    setTimeout(() => playTone(784, 0.2, 'sine', 0.3), 200); // G5
+}
+
+/**
+ * Sound: Message received (soft notification)
+ */
+function playMessageSound() {
+    playTone(880, 0.1, 'sine', 0.2); // A5
+    setTimeout(() => playTone(1047, 0.15, 'sine', 0.15), 80); // C6
+}
+
+/**
+ * Sound: Error/disconnect (descending tones)
+ */
+function playErrorSound() {
+    playTone(440, 0.15, 'square', 0.2); // A4
+    setTimeout(() => playTone(349, 0.2, 'square', 0.2), 120); // F4
+}
+
+/**
+ * Sound: Send message (quick blip)
+ */
+function playSendSound() {
+    playTone(660, 0.08, 'sine', 0.15);
 }
 
 // ========================================

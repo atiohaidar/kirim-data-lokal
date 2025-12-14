@@ -64,8 +64,20 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
     padding: 20px;
     overflow-x: hidden;
+    gap: 1rem;
+}
+
+/* Desktop: Allow body to flex items in a row */
+@media (min-width: 900px) {
+    body {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 }
 
 /* Animated Background Overlay */
@@ -347,48 +359,265 @@ textarea:focus {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* --- Splash Screen --- */
+/* --- Epic Splash Screen --- */
 .splash-screen {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 50%, var(--bg-gradient-3) 100%);
+    background: #000;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    overflow: hidden;
+    perspective: 1000px;
+}
+
+.splash-screen.zoom-out {
+    animation: zoomOut 0.5s ease-out forwards;
+}
+
+@keyframes zoomOut {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Container fade in sync with splash zoom out */
+.container.fade-in {
+    animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .splash-screen.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    display: none;
 }
 
+/* Matrix Rain Background */
+.matrix-rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.matrix-column {
+    position: absolute;
+    top: -100%;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary);
+    writing-mode: vertical-rl;
+    animation: matrixFall linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes matrixFall {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(200vh);
+    }
+}
+
+/* Splash Content */
+.splash-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    animation: zoomIn 0.5s ease-out;
+}
+
+@keyframes zoomIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Rocket with trail */
 .splash-logo {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    animation: bounce 1s ease-in-out infinite;
+    font-size: 5rem;
+    position: relative;
+    animation: rocketFly 0.5s ease-out forwards;
+    filter: drop-shadow(0 0 20px var(--primary));
 }
 
+@keyframes rocketFly {
+    0% {
+        transform: translateY(100px) rotate(45deg) scale(0.5);
+        opacity: 0;
+    }
+
+    30% {
+        transform: translateY(0) rotate(0deg) scale(1.2);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(-5deg) scale(1);
+    }
+
+    70% {
+        transform: translateY(-10px) rotate(5deg) scale(1.1);
+    }
+
+    100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+.rocket-trail {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 0;
+    background: linear-gradient(to bottom, var(--primary), transparent);
+    animation: trailGrow 0.5s ease-out 0.2s forwards;
+    border-radius: 2px;
+}
+
+@keyframes trailGrow {
+    0% {
+        height: 0;
+        opacity: 1;
+    }
+
+    50% {
+        height: 60px;
+        opacity: 0.8;
+    }
+
+    100% {
+        height: 0;
+        opacity: 0;
+    }
+}
+
+/* Hacker Glitch Text */
 .splash-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text);
-    opacity: 0;
-    animation: fadeInUp 0.5s ease-out 0.3s forwards;
+    margin-top: 1.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+    position: relative;
 }
 
+.hacker-text {
+    color: var(--primary-light);
+    text-shadow: 0 0 10px var(--primary);
+    animation: glitch 2s ease-in-out infinite;
+    display: inline-block;
+}
+
+@keyframes glitch {
+
+    0%,
+    90%,
+    100% {
+        transform: translate(0);
+        text-shadow: 0 0 10px var(--primary);
+    }
+
+    92% {
+        transform: translate(-2px, 1px);
+        text-shadow: 2px 0 var(--accent), -2px 0 var(--error);
+    }
+
+    94% {
+        transform: translate(2px, -1px);
+        text-shadow: -2px 0 var(--primary), 2px 0 var(--success);
+    }
+
+    96% {
+        transform: translate(-1px, 2px);
+        text-shadow: 2px 0 var(--error), -2px 0 var(--accent);
+    }
+}
+
+/* Typewriter Subtitle */
 .splash-subtitle {
+    margin-top: 1rem;
+    font-family: 'Monaco', 'Consolas', monospace;
     font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-top: 0.5rem;
-    opacity: 0;
-    animation: fadeInUp 0.5s ease-out 0.5s forwards;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.splash-subtitle .cursor {
+    color: var(--primary);
+    animation: cursorBlink 0.7s ease-in-out infinite;
+}
+
+@keyframes cursorBlink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Loading Bar */
+.splash-loader {
+    margin-top: 2rem;
+    width: 200px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.loader-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: loadProgress 0.5s ease-out forwards, shimmer 0.5s linear infinite;
+}
+
+@keyframes loadProgress {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: 100%;
+    }
 }
 
 /* --- Success Effect Overlay --- */
@@ -487,6 +716,90 @@ textarea:focus {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-hover);
+}
+
+/* --- Status Log (Cinematic Loading) --- */
+.status-log {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    text-align: left;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.log-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    color: var(--text-secondary);
+    opacity: 0;
+    animation: fadeInUp 0.3s ease-out forwards;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.log-line:last-child {
+    border-bottom: none;
+}
+
+.log-line.success {
+    color: var(--success);
+}
+
+.log-line.error {
+    color: var(--error);
+}
+
+.log-line.active {
+    color: var(--primary-light);
+}
+
+.log-icon {
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+.log-icon.spin {
+    animation: spin 1s linear infinite;
+}
+
+.log-text {
+    flex: 1;
+}
+
+.log-text::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--primary);
+    margin-left: 4px;
+    animation: blink 0.8s ease-in-out infinite;
+    vertical-align: middle;
+}
+
+.log-line.success .log-text::after,
+.log-line.error .log-text::after {
+    display: none;
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
 }
 
 /* --- Responsive --- */
