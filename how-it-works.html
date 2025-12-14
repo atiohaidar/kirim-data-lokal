@@ -23,7 +23,16 @@
         <main class="viz-main">
             <!-- Animation Canvas -->
             <section class="viz-canvas" id="anim-canvas">
-                <!-- Animation content rendered by JS -->
+                <!-- Theme Toggle Button (top-left) -->
+                <!-- <button class="btn-theme-toggle" id="btn-theme" onclick="toggleTheme()" title="Ganti Mode Terang/Gelap">
+                    🌙
+                </button> -->
+                <!-- Reload Animation Button (top-right) -->
+                <button class="btn-reload-overlay" id="btn-reload" onclick="reloadAnimation()" title="Ulang Animasi">
+                    🔄
+                </button>
+                <!-- Animation content container (rendered by JS) -->
+                <div id="anim-content" class="anim-content"></div>
             </section>
 
             <!-- Explanation Panel -->
@@ -52,9 +61,6 @@
             <div class="viz-nav-btns">
                 <button class="btn-nav" id="btn-prev" onclick="prevStep()" disabled>
                     ← Sebelumnya
-                </button>
-                <button class="btn-nav" id="btn-reload" onclick="reloadAnimation()">
-                    🔄 Ulang Animasi
                 </button>
                 <button class="btn-nav" id="btn-next" onclick="nextStep()">
                     Selanjutnya →

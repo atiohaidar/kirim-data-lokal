@@ -3,6 +3,7 @@
    Animations and layout for how-it-works page
    ======================================== */
 
+/* Dark Mode (default) */
 :root {
     --viz-bg: #0a0a0f;
     --viz-card: rgba(20, 20, 30, 0.9);
@@ -12,6 +13,60 @@
     --viz-text: #e2e8f0;
     --viz-muted: #64748b;
     --viz-border: rgba(255, 255, 255, 0.1);
+    --viz-code-bg: rgba(0, 0, 0, 0.4);
+    --viz-device-bg: linear-gradient(135deg, #1e293b, #334155);
+    --viz-device-screen: #0f172a;
+    --viz-server-bg: linear-gradient(135deg, #312e81, #4338ca);
+    --viz-file-bg: linear-gradient(135deg, #475569, #64748b);
+    --viz-file-corner: #334155;
+    --viz-overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
+/* Light Mode */
+:root.light-mode {
+    --viz-bg: #f8fafc;
+    --viz-card: rgba(255, 255, 255, 0.95);
+    --viz-primary: #059669;
+    --viz-secondary: #4f46e5;
+    --viz-accent: #d97706;
+    --viz-text: #1e293b;
+    --viz-muted: #64748b;
+    --viz-border: rgba(0, 0, 0, 0.1);
+    --viz-code-bg: rgba(0, 0, 0, 0.05);
+    --viz-device-bg: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    --viz-device-screen: #f1f5f9;
+    --viz-server-bg: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+    --viz-file-bg: linear-gradient(135deg, #cbd5e1, #94a3b8);
+    --viz-file-corner: #e2e8f0;
+    --viz-overlay-bg: rgba(255, 255, 255, 0.8);
+}
+
+/* Theme Toggle Button */
+.btn-theme-toggle {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--viz-overlay-bg);
+    border: 1px solid var(--viz-border);
+    color: var(--viz-text);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.btn-theme-toggle:hover {
+    background: var(--viz-primary);
+    color: var(--viz-bg);
+    border-color: var(--viz-primary);
+    transform: rotate(20deg);
 }
 
 * {
@@ -106,6 +161,44 @@ body.viz-page {
     overflow: hidden;
 }
 
+/* Animation Content Container */
+.anim-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Reload Button Overlay (top-right of canvas) */
+.btn-reload-overlay {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--viz-border);
+    color: var(--viz-text);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+.btn-reload-overlay:hover {
+    background: var(--viz-primary);
+    color: var(--viz-bg);
+    border-color: var(--viz-primary);
+    transform: rotate(180deg);
+}
+
 /* Explanation Area */
 .viz-explanation {
     display: flex;
@@ -166,7 +259,7 @@ body.viz-page {
 
 /* Code snippet */
 .viz-code {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--viz-code-bg);
     border-radius: 8px;
     padding: 1rem;
     font-family: 'Consolas', monospace;
@@ -174,6 +267,7 @@ body.viz-page {
     color: var(--viz-muted);
     overflow-x: auto;
     margin-top: 1rem;
+    border: 1px solid var(--viz-border);
 }
 
 .viz-code .keyword {
@@ -317,7 +411,7 @@ body.viz-page {
 .device {
     width: 80px;
     height: 100px;
-    background: linear-gradient(135deg, #1e293b, #334155);
+    background: var(--viz-device-bg);
     border-radius: 12px;
     border: 2px solid var(--viz-border);
     display: flex;
@@ -326,13 +420,13 @@ body.viz-page {
     justify-content: center;
     position: absolute;
     transition: all 0.5s ease;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .device-screen {
     width: 60px;
     height: 50px;
-    background: #0f172a;
+    background: var(--viz-device-screen);
     border-radius: 4px;
     margin-bottom: 8px;
     display: flex;
@@ -355,7 +449,7 @@ body.viz-page {
 .server {
     width: 100px;
     height: 80px;
-    background: linear-gradient(135deg, #312e81, #4338ca);
+    background: var(--viz-server-bg);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -363,6 +457,7 @@ body.viz-page {
     justify-content: center;
     position: absolute;
     transition: all 0.5s ease;
+    border: 1px solid var(--viz-border);
 }
 
 .server-icon {
@@ -428,7 +523,7 @@ body.viz-page {
 .file-icon {
     width: 50px;
     height: 60px;
-    background: linear-gradient(135deg, #475569, #64748b);
+    background: var(--viz-file-bg);
     border-radius: 4px;
     position: relative;
     display: flex;
@@ -444,7 +539,7 @@ body.viz-page {
     right: 0;
     border-width: 10px;
     border-style: solid;
-    border-color: #334155 #334155 #64748b #64748b;
+    border-color: var(--viz-file-corner) var(--viz-file-corner) transparent transparent;
 }
 
 /* Chunks */

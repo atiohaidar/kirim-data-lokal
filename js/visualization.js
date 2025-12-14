@@ -121,10 +121,42 @@ sendFn({
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     renderStep(0);
     updateProgressDots();
     updateNavButtons();
 });
+
+// ========================================
+// THEME TOGGLE
+// ========================================
+
+function initTheme() {
+    // Check saved preference or system preference
+    const savedTheme = localStorage.getItem('viz-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+        document.documentElement.classList.add('light-mode');
+        updateThemeIcon(true);
+    } else {
+        updateThemeIcon(false);
+    }
+}
+
+function toggleTheme() {
+    const isLightMode = document.documentElement.classList.toggle('light-mode');
+    localStorage.setItem('viz-theme', isLightMode ? 'light' : 'dark');
+    updateThemeIcon(isLightMode);
+}
+
+function updateThemeIcon(isLightMode) {
+    const btn = document.getElementById('btn-theme');
+    if (btn) {
+        btn.textContent = isLightMode ? '☀️' : '🌙';
+        btn.title = isLightMode ? 'Mode Gelap' : 'Mode Terang';
+    }
+}
 
 // ========================================
 // NAVIGATION
@@ -222,7 +254,8 @@ function escapeHtml(text) {
 // ========================================
 
 function renderAnimation(stepId) {
-    const canvas = document.getElementById('anim-canvas');
+    const canvas = document.getElementById('anim-content');
+    if (!canvas) return;
 
     switch (stepId) {
         case 'intro':
