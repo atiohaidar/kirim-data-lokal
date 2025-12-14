@@ -562,8 +562,8 @@ function setupConnection() {
             addActivityLog('info', `👤 Peer bernama: ${peerUsername}`);
         } else {
             // Display with username if available
-            const displayName = peerUsername || `Peer`;
-            log(`<strong>${displayName}:</strong> ${data}`, 'peer');
+            // Display without username prefix as requested
+            log(data, 'peer');
             trackMsgRecv(data);
         }
     });

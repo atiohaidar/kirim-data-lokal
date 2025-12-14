@@ -89,25 +89,80 @@ function autoScroll(containerId = 'chat-box') {
  * @param {string} type - Message type: 'me', 'peer', or 'system'
  * @param {string} containerId - The ID of the chat container
  */
+/**
+ * Log a message to the chat box with animation and copy button
+ * @param {string} msg - The message content (can be HTML)
+ * @param {string} type - Message type: 'me', 'peer', or 'system'
+ * @param {string} containerId - The ID of the chat container
+ */
 function log(msg, type = 'system', containerId = 'chat-box') {
     const box = document.getElementById(containerId);
     if (!box) return;
 
     const d = document.createElement('div');
     d.className = `msg ${type}`;
-    d.innerHTML = msg;
+
+    // Add copy button for non-system messages
+    if (type !== 'system') {
+        // We need to store raw text for copying, stripping HTML if possible
+        // For simplicity, we assume msg might have HTML but we copy textContent of the message part
+        // Since msg passes HTML (like images), we should handle text differently.
+        // But the request says "copy chat if it's a message".
+        // Let's add the button.
+
+        // Wrap content
+        d.innerHTML = `<span>${msg}</span>`;
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.innerHTML = '📋'; // Clipboard icon
+        copyBtn.title = 'Salin pesan';
+        copyBtn.onclick = (e) => {
+            // Stop propagation to avoid triggering file previews if any
+            e.stopPropagation();
+            // Copy text content only
+            const textToCopy = d.querySelector('span').innerText;
+            copyMsgToClipboard(textToCopy);
+        };
+        d.appendChild(copyBtn);
+    } else {
+        d.innerHTML = msg;
+    }
 
     // Animation is handled by CSS
     box.appendChild(d);
 
     // Show success effect for sent messages
     if (type === 'me' && typeof showConfetti === 'function') {
-        // Small confetti burst for sent messages
         const rect = d.getBoundingClientRect();
-        // showConfetti(rect.left + rect.width / 2, rect.top); // Optional: uncomment for confetti on each message
+        // showConfetti(rect.left + rect.width / 2, rect.top); 
     }
 
     autoScroll(containerId);
+}
+
+/**
+ * Copy specific chat message to clipboard
+ */
+function copyMsgToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showCopyToast();
+    }).catch(err => {
+        console.error('Failed to copy', err);
+    });
+}
+
+function showCopyToast() {
+    const toast = document.getElementById('copy-toast');
+    if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    } else {
+        // Fallback if element missing
+        alert('Pesan disalin! 📋');
+    }
 }
 
 // ========================================

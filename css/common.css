@@ -108,6 +108,95 @@ body::before {
     padding: 1rem;
     position: relative;
     overflow: hidden;
+    /* Ensure it doesn't shrink too small */
+    flex-shrink: 0;
+}
+
+/* --- Page Layout (Wrapper) --- */
+.page-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+    /* Prevent stretching on wide screens */
+    margin: 0 auto;
+    padding-top: 2rem;
+    /* Initial padding */
+    padding-bottom: 2rem;
+}
+
+@media (min-width: 900px) {
+    .page-layout {
+        flex-direction: row;
+        align-items: flex-start;
+        /* Align Top */
+        justify-content: center;
+    }
+}
+
+/* --- Copy Success Toast --- */
+.copy-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+}
+
+.copy-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* --- Chat Copy Button --- */
+.msg {
+    position: relative;
+    /* Context for absolute button */
+}
+
+/* Only show copy button on hover for desktop, or make it visible for mobile */
+.msg .copy-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.msg:hover .copy-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.msg .copy-btn:hover {
+    color: var(--primary-light);
+    border-color: var(--primary);
+    transform: scale(1.1);
 }
 
 /* Glass shine effect */

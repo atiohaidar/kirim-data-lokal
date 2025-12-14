@@ -3,15 +3,7 @@
    Styles specific to native.html (WebRTC)
    ======================================== */
 
-/* --- Page Layout --- */
-.page-layout {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
-    box-sizing: border-box;
-}
+
 
 /* --- Drop Zone --- */
 .drop-zone {

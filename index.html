@@ -41,222 +41,228 @@
         </div>
     </div>
 
-    <div class="container">
-        <!-- Step 1: Menu Awal -->
-        <div id="step-menu" class="step active">
-            <h1>🚀 Kirim Data</h1>
-            <p class="subtitle">
-                Transfer file langsung antar perangkat.<br>
-                Menggunakan Peer Js
-            </p>
+    <div class="page-layout">
+        <div class="container">
+            <!-- Step 1: Menu Awal -->
+            <div id="step-menu" class="step active">
+                <h1>🚀 Kirim Data</h1>
+                <p class="subtitle">
+                    Transfer file langsung antar perangkat.<br>
+                    Menggunakan Peer Js
+                </p>
 
-            <!-- Optional Username -->
-            <!-- <div class="username-input-group">
-                <input type="text" id="username-input" class="username-input" placeholder="Username (opsional)"
-                    maxlength="20">
+                <!-- Optional Username -->
+                <!-- <div class="username-input-group">
+                    <input type="text" id="username-input" class="username-input" placeholder="Username (opsional)"
+                        maxlength="20">
+                </div> -->
+
+                <button class="btn" onclick="initHost()">
+                    <span>📡 Buat Room Baru</span>
+                </button>
+                <button class="btn secondary" onclick="showJoin()">
+                    <span>🔗 Gabung ke Room</span>
+                </button>
+                <button class="btn secondary" onclick="window.location='how-it-works.html'"
+                    style="margin-top: 0.5rem; background: transparent; border: 1px solid rgba(255,255,255,0.2);">
+                    <span>❓ Bagaimana Cara Kerjanya?</span>
+                </button>
+
+                <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                    Ingin mencoba versi murni <b>WebRTC (Tanpa Server)</b> tanpa server PeerJS?<br>
+                    <a href="./native.html"
+                        style="color: var(--primary); text-decoration: none; border-bottom: 1px dashed var(--primary);">
+                        Coba Mode Manual di sini ↗
+                    </a>
+                </p>
+            </div>
+
+            <!-- Step 2: Host Room (QR) -->
+            <div id="step-host" class="step">
+                <h1>📡 Room Kamu</h1>
+                <p class="subtitle">Bagikan kode room untuk terhubung</p>
+
+                <p style="text-align: center; margin:0; font-size:0.9rem; color:var(--text-secondary);">Kode Room:</p>
+                <div id="my-id-display" class="id-display" onclick="copyId()" title="Klik untuk salin">...</div>
+
+                <!-- Optional QR Code Section -->
+                <div id="qr-section" style="display: none;">
+                    <div class="qr-container" id="qrcode"></div>
+                </div>
+                <button id="btn-generate-qr" class="btn secondary" onclick="generateQR()"
+                    style="margin-bottom: 0.5rem;">
+                    <span>📱 Tampilkan QR Code</span>
+                </button>
+
+                <!-- Status Log - Cinematic Loading -->
+                <div class="status-log" id="host-status-log">
+                    <div class="log-line">
+                        <span class="log-icon">⏳</span>
+                        <span class="log-text">Menyiapkan koneksi...</span>
+                    </div>
+                </div>
+
+                <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
+            </div>
+
+            <!-- Step 3: Join Input / Scan -->
+            <div id="step-join" class="step">
+                <h1>🔗 Gabung Room</h1>
+                <p class="subtitle">Scan QR atau masukkan kode room</p>
+
+                <div id="reader"></div>
+
+                <button id="btn-scan" class="btn" onclick="startScanner()">📷 Scan QR Kamera</button>
+
+                <div style="text-align: center; margin: 1.5rem 0; color: var(--text-muted);">
+                    <span style="background: var(--bg-dark); padding: 0 1rem;">atau</span>
+                </div>
+
+                <input type="text" id="join-id-input" placeholder="Masukkan kode room" maxlength="6">
+                <button id="btn-join" class="btn" onclick="joinRoom()">Hubungkan</button>
+
+                <!-- Status Log - Join Process -->
+                <div class="status-log" id="join-status-log" style="display: none;">
+                    <div class="log-line active">
+                        <span class="log-icon spin">⏳</span>
+                        <span class="log-text">Menghubungkan...</span>
+                    </div>
+                </div>
+
+                <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
+            </div>
+
+            <!-- Step 4: Chat Interface -->
+            <div id="step-chat" class="step">
+                <div class="connected-badge">
+                    <span class="connected-dot"></span>
+                    Terhubung
+                </div>
+
+                <div class="chat-box" id="chat-box"></div>
+
+                <!-- Drag & Drop Overlay -->
+                <div id="drag-overlay" class="drag-overlay" style="display: none;">
+                    <div class="drag-content">
+                        <span class="emoji">📂</span>
+                        Lepaskan file di sini
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="msg-input" placeholder="Tulis pesan..." onkeypress="handleKey(event)">
+                    <button class="btn send-btn" onclick="sendMsg()">➤</button>
+                </div>
+
+                <label for="fileInput">📎 Kirim file (klik, drag & drop, atau paste)</label>
+                <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(this)">
+
+                <!-- Info Panel Toggle Button (mobile) -->
+                <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()">
+                    <span>📊 Tampilkan Informasi</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn secondary danger" onclick="resetApp()"
+                        style="width: auto; padding: 8px 20px; font-size: 0.85rem;">
+                        Keluar Room
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Panel (outside container for side-by-side layout) -->
+        <div class="info-panel" id="info-panel">
+            <div class="info-panel-header">
+                <h3>📊 Informasi Tambahan</h3>
+            </div>
+
+            <!-- Status Koneksi -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="card-icon">🔌</span>
+                    Status Koneksi
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Status</span>
+                    <span class="status-value" id="info-status">
+                        <span class="status-dot connecting"></span>
+                        Menunggu...
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Room ID</span>
+                    <span class="status-value">
+                        <span class="room-id-badge" id="info-room-id">-</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Role</span>
+                    <span class="status-value" id="info-role">-</span>
+                </div>
+            </div>
+
+            <!-- User Terhubung
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="card-icon">👥</span>
+                    User Terhubung
+                </div>
+                <div class="users-list" id="info-users">
+                    <div class="empty-users">Belum ada user terhubung</div>
+                </div>
             </div> -->
 
-            <button class="btn" onclick="initHost()">
-                <span>📡 Buat Room Baru</span>
-            </button>
-            <button class="btn secondary" onclick="showJoin()">
-                <span>🔗 Gabung ke Room</span>
-            </button>
-            <button class="btn secondary" onclick="window.location='how-it-works.html'"
-                style="margin-top: 0.5rem; background: transparent; border: 1px solid rgba(255,255,255,0.2);">
-                <span>❓ Bagaimana Cara Kerjanya?</span>
-            </button>
-
-            <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
-                Ingin mencoba versi murni <b>WebRTC (Tanpa Server)</b> tanpa server PeerJS?<br>
-                <a href="./native.html"
-                    style="color: var(--primary); text-decoration: none; border-bottom: 1px dashed var(--primary);">
-                    Coba Mode Manual di sini ↗
-                </a>
-            </p>
-        </div>
-
-        <!-- Step 2: Host Room (QR) -->
-        <div id="step-host" class="step">
-            <h1>📡 Room Kamu</h1>
-            <p class="subtitle">Bagikan kode room untuk terhubung</p>
-
-            <p style="text-align: center; margin:0; font-size:0.9rem; color:var(--text-secondary);">Kode Room:</p>
-            <div id="my-id-display" class="id-display" onclick="copyId()" title="Klik untuk salin">...</div>
-
-            <!-- Optional QR Code Section -->
-            <div id="qr-section" style="display: none;">
-                <div class="qr-container" id="qrcode"></div>
-            </div>
-            <button id="btn-generate-qr" class="btn secondary" onclick="generateQR()" style="margin-bottom: 0.5rem;">
-                <span>📱 Tampilkan QR Code</span>
-            </button>
-
-            <!-- Status Log - Cinematic Loading -->
-            <div class="status-log" id="host-status-log">
-                <div class="log-line">
-                    <span class="log-icon">⏳</span>
-                    <span class="log-text">Menyiapkan koneksi...</span>
+            <!-- Statistik Transfer -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="card-icon">📈</span>
+                    Statistik Transfer
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-bytes-sent">0 B</div>
+                        <div class="stat-label">Dikirim</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-bytes-recv">0 B</div>
+                        <div class="stat-label">Diterima</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-files-sent">0</div>
+                        <div class="stat-label">File Kirim</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-files-recv">0</div>
+                        <div class="stat-label">File Terima</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-msg-sent">0</div>
+                        <div class="stat-label">Pesan Kirim</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-msg-recv">0</div>
+                        <div class="stat-label">Pesan Terima</div>
+                    </div>
                 </div>
             </div>
 
-            <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
-        </div>
-
-        <!-- Step 3: Join Input / Scan -->
-        <div id="step-join" class="step">
-            <h1>🔗 Gabung Room</h1>
-            <p class="subtitle">Scan QR atau masukkan kode room</p>
-
-            <div id="reader"></div>
-
-            <button id="btn-scan" class="btn" onclick="startScanner()">📷 Scan QR Kamera</button>
-
-            <div style="text-align: center; margin: 1.5rem 0; color: var(--text-muted);">
-                <span style="background: var(--bg-dark); padding: 0 1rem;">atau</span>
-            </div>
-
-            <input type="text" id="join-id-input" placeholder="Masukkan kode room" maxlength="6">
-            <button id="btn-join" class="btn" onclick="joinRoom()">Hubungkan</button>
-
-            <!-- Status Log - Join Process -->
-            <div class="status-log" id="join-status-log" style="display: none;">
-                <div class="log-line active">
-                    <span class="log-icon spin">⏳</span>
-                    <span class="log-text">Menghubungkan...</span>
+            <!-- Log Aktivitas -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="card-icon">📝</span>
+                    Log Aktivitas
                 </div>
-            </div>
-
-            <button class="btn secondary" onclick="showStep('step-menu', 'left')">← Kembali</button>
-        </div>
-
-        <!-- Step 4: Chat Interface -->
-        <div id="step-chat" class="step">
-            <div class="connected-badge">
-                <span class="connected-dot"></span>
-                Terhubung
-            </div>
-
-            <div class="chat-box" id="chat-box"></div>
-
-            <!-- Drag & Drop Overlay -->
-            <div id="drag-overlay" class="drag-overlay" style="display: none;">
-                <div class="drag-content">
-                    <span class="emoji">📂</span>
-                    Lepaskan file di sini
+                <div class="activity-log" id="activity-log">
+                    <div class="empty-log">Belum ada aktivitas</div>
                 </div>
-            </div>
-
-            <div class="input-group">
-                <input type="text" id="msg-input" placeholder="Tulis pesan..." onkeypress="handleKey(event)">
-                <button class="btn send-btn" onclick="sendMsg()">➤</button>
-            </div>
-
-            <label for="fileInput">📎 Kirim file (klik, drag & drop, atau paste)</label>
-            <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(this)">
-
-            <!-- Info Panel Toggle Button (mobile) -->
-            <button class="info-toggle-btn" id="info-toggle-btn" onclick="toggleInfoPanel()">
-                <span>📊 Tampilkan Informasi</span>
-                <span class="toggle-icon">▼</span>
-            </button>
-
-            <div style="text-align: center; margin-top: 1rem;">
-                <button class="btn secondary danger" onclick="resetApp()"
-                    style="width: auto; padding: 8px 20px; font-size: 0.85rem;">
-                    Keluar Room
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Information Panel (outside container for side-by-side layout) -->
-    <div class="info-panel" id="info-panel">
-        <div class="info-panel-header">
-            <h3>📊 Informasi Tambahan</h3>
-        </div>
-
-        <!-- Status Koneksi -->
-        <div class="info-card">
-            <div class="info-card-header">
-                <span class="card-icon">🔌</span>
-                Status Koneksi
-            </div>
-            <div class="status-item">
-                <span class="status-label">Status</span>
-                <span class="status-value" id="info-status">
-                    <span class="status-dot connecting"></span>
-                    Menunggu...
-                </span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Room ID</span>
-                <span class="status-value">
-                    <span class="room-id-badge" id="info-room-id">-</span>
-                </span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Role</span>
-                <span class="status-value" id="info-role">-</span>
-            </div>
-        </div>
-
-        <!-- User Terhubung
-        <div class="info-card">
-            <div class="info-card-header">
-                <span class="card-icon">👥</span>
-                User Terhubung
-            </div>
-            <div class="users-list" id="info-users">
-                <div class="empty-users">Belum ada user terhubung</div>
-            </div>
-        </div> -->
-
-        <!-- Statistik Transfer -->
-        <div class="info-card">
-            <div class="info-card-header">
-                <span class="card-icon">📈</span>
-                Statistik Transfer
-            </div>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-bytes-sent">0 B</div>
-                    <div class="stat-label">Dikirim</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-bytes-recv">0 B</div>
-                    <div class="stat-label">Diterima</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-files-sent">0</div>
-                    <div class="stat-label">File Kirim</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-files-recv">0</div>
-                    <div class="stat-label">File Terima</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-msg-sent">0</div>
-                    <div class="stat-label">Pesan Kirim</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="stat-msg-recv">0</div>
-                    <div class="stat-label">Pesan Terima</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Log Aktivitas -->
-        <div class="info-card">
-            <div class="info-card-header">
-                <span class="card-icon">📝</span>
-                Log Aktivitas
-            </div>
-            <div class="activity-log" id="activity-log">
-                <div class="empty-log">Belum ada aktivitas</div>
-            </div>
-        </div>
-    </div>
+    <!-- Copy Toast Notification -->
+    <div id="copy-toast" class="copy-toast">Salin Berhasil! ✅</div>
 
     <!-- Modular JavaScript -->
     <script src="js/entrance.js"></script>
