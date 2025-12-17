@@ -1,6 +1,6 @@
 # Kirim Data - Flutter Mobile App
 
-Aplikasi mobile Flutter untuk transfer file P2P langsung antar perangkat menggunakan WebRTC. **Tanpa server, tanpa internet** (Mode Offline).
+Aplikasi mobile Flutter untuk transfer file P2P langsung antar perangkat menggunakan WebRTC. **Tanpa server, tanpa internet** (WebRTC P2P).
 
 ## 📱 Fitur
 
@@ -13,7 +13,7 @@ Aplikasi mobile Flutter untuk transfer file P2P langsung antar perangkat menggun
 
 ## 🚀 Cara Kerja
 
-Mode Offline menggunakan pertukaran kode SDP secara manual:
+WebRTC P2P menggunakan pertukaran kode SDP secara manual:
 
 1. **Pengirim** membuat "tiket undangan" (SDP Offer)
 2. Copy & kirim tiket ke teman (via WA/chat lain)
@@ -94,4 +94,4 @@ lib/
 ## 🔗 Related
 
 - [Web Version](../index.html) - Mode Online dengan PeerJS
-- [Native Web Version](../native.html) - Mode Offline untuk browser
+- [Native Web Version](../native.html) - WebRTC P2P untuk browser

@@ -99,7 +99,7 @@ class HomeScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Mode Offline',
+                                  'WebRTC P2P',
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleMedium
