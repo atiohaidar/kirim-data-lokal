@@ -195,8 +195,6 @@ const NativeVideo = {
             }
         }, 1000);
     },
-    this.endCallInternal();
-},
 
     /**
      * Internal cleanup
@@ -227,128 +225,128 @@ const NativeVideo = {
         pc.getSenders().forEach(sender => pc.removeTrack(sender));
     },
 
-        // --- Media Controls ---
+    // --- Media Controls ---
 
-        toggleAudio() {
-    if (this.localStream) {
-        const audioTrack = this.localStream.getAudioTracks()[0];
-        if (audioTrack) {
-            this.isMuted = !this.isMuted;
-            audioTrack.enabled = !this.isMuted;
-            this.updateControlUI('btn-toggle-mic', this.isMuted, '🎤', '🔇');
+    toggleAudio() {
+        if (this.localStream) {
+            const audioTrack = this.localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                this.isMuted = !this.isMuted;
+                audioTrack.enabled = !this.isMuted;
+                this.updateControlUI('btn-toggle-mic', this.isMuted, '🎤', '🔇');
+            }
         }
-    }
-},
+    },
 
-toggleVideo() {
-    if (this.localStream) {
-        const videoTrack = this.localStream.getVideoTracks()[0];
-        if (videoTrack) {
-            this.isCameraOff = !this.isCameraOff;
-            videoTrack.enabled = !this.isCameraOff;
-            this.updateControlUI('btn-toggle-cam', this.isCameraOff, '📹', '🚫');
+    toggleVideo() {
+        if (this.localStream) {
+            const videoTrack = this.localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                this.isCameraOff = !this.isCameraOff;
+                videoTrack.enabled = !this.isCameraOff;
+                this.updateControlUI('btn-toggle-cam', this.isCameraOff, '📹', '🚫');
+            }
         }
-    }
-},
+    },
 
-updateControlUI(btnId, isOff, onIcon, offIcon) {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-        btn.innerHTML = isOff ? offIcon : onIcon;
-        btn.classList.toggle('off', isOff);
-    }
-},
+    updateControlUI(btnId, isOff, onIcon, offIcon) {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+            btn.innerHTML = isOff ? offIcon : onIcon;
+            btn.classList.toggle('off', isOff);
+        }
+    },
 
-// --- UI Helpers ---
+    // --- UI Helpers ---
 
-showVideoUI() {
-    document.getElementById('video-overlay').classList.add('visible');
-},
+    showVideoUI() {
+        document.getElementById('video-overlay').classList.add('visible');
+    },
 
-hideVideoUI() {
-    document.getElementById('video-overlay').classList.remove('visible');
-},
+    hideVideoUI() {
+        document.getElementById('video-overlay').classList.remove('visible');
+    },
 
-displayLocalVideo(stream) {
-    const video = document.getElementById('local-video');
-    video.srcObject = stream;
-    video.muted = true;
-},
+    displayLocalVideo(stream) {
+        const video = document.getElementById('local-video');
+        video.srcObject = stream;
+        video.muted = true;
+    },
 
-displayRemoteVideo(stream) {
-    const video = document.getElementById('remote-video');
-    video.srcObject = stream;
-},
+    displayRemoteVideo(stream) {
+        const video = document.getElementById('remote-video');
+        video.srcObject = stream;
+    },
 
-// --- Advanced Camera Controls ---
+    // --- Advanced Camera Controls ---
 
-getConstraints() {
-    // Eco Mode: VGA (640x480) @ 15fps - Hemat Baterai & Data
-    // HD Mode: HD (1280x720) @ 30fps
-    const videoConstraints = this.isEcoMode
-        ? { width: 640, height: 480, frameRate: 15, facingMode: this.currentFacingMode }
-        : { width: 1280, height: 720, frameRate: 30, facingMode: this.currentFacingMode };
+    getConstraints() {
+        // Eco Mode: VGA (640x480) @ 15fps - Hemat Baterai & Data
+        // HD Mode: HD (1280x720) @ 30fps
+        const videoConstraints = this.isEcoMode
+            ? { width: 640, height: 480, frameRate: 15, facingMode: this.currentFacingMode }
+            : { width: 1280, height: 720, frameRate: 30, facingMode: this.currentFacingMode };
 
-    return {
-        video: videoConstraints,
-        audio: { echoCancellation: true, noiseSuppression: true }
-    };
-},
+        return {
+            video: videoConstraints,
+            audio: { echoCancellation: true, noiseSuppression: true }
+        };
+    },
 
     async switchCamera() {
-    if (!this.localStream) return;
-    this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
-    await this.restartStream();
-    addActivityLog('info', `📷 Kamera: ${this.currentFacingMode === 'user' ? 'Depan' : 'Belakang'}`);
-},
+        if (!this.localStream) return;
+        this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
+        await this.restartStream();
+        addActivityLog('info', `📷 Kamera: ${this.currentFacingMode === 'user' ? 'Depan' : 'Belakang'}`);
+    },
 
     async toggleQuality() {
-    if (!this.localStream) return;
-    this.isEcoMode = !this.isEcoMode;
-    await this.restartStream();
+        if (!this.localStream) return;
+        this.isEcoMode = !this.isEcoMode;
+        await this.restartStream();
 
-    const mode = this.isEcoMode ? 'Eco (Hemat)' : 'HD (Jernih)';
-    addActivityLog('info', `⚡ Mode Video: ${mode}`);
+        const mode = this.isEcoMode ? 'Eco (Hemat)' : 'HD (Jernih)';
+        addActivityLog('info', `⚡ Mode Video: ${mode}`);
 
-    // Update UI button text if needed, or toast
-    const btn = document.getElementById('btn-quality');
-    if (btn) btn.innerHTML = this.isEcoMode ? '⚡' : 'ᴴᴰ';
-},
+        // Update UI button text if needed, or toast
+        const btn = document.getElementById('btn-quality');
+        if (btn) btn.innerHTML = this.isEcoMode ? '⚡' : 'ᴴᴰ';
+    },
 
     async restartStream() {
-    // 1. Stop current tracks
-    if (this.localStream) {
-        this.localStream.getTracks().forEach(t => t.stop());
-    }
-
-    try {
-        // 2. Get new stream
-        const newStream = await navigator.mediaDevices.getUserMedia(this.getConstraints());
-        this.localStream = newStream;
-        this.displayLocalVideo(newStream);
-
-        // 3. Replace track in Sender (Seamless Switch)
-        if (pc) {
-            const videoTrack = newStream.getVideoTracks()[0];
-            const audioTrack = newStream.getAudioTracks()[0];
-
-            const senders = pc.getSenders();
-            const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-            const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-
-            if (videoSender && videoTrack) await videoSender.replaceTrack(videoTrack);
-            if (audioSender && audioTrack) await audioSender.replaceTrack(audioTrack);
+        // 1. Stop current tracks
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(t => t.stop());
         }
 
-        // Restore Mute/Video Off state
-        if (this.isMuted && newStream.getAudioTracks()[0]) newStream.getAudioTracks()[0].enabled = false;
-        if (this.isCameraOff && newStream.getVideoTracks()[0]) newStream.getVideoTracks()[0].enabled = false;
+        try {
+            // 2. Get new stream
+            const newStream = await navigator.mediaDevices.getUserMedia(this.getConstraints());
+            this.localStream = newStream;
+            this.displayLocalVideo(newStream);
 
-    } catch (err) {
-        console.error("Camera switch failed", err);
-        alert("Gagal ganti kamera: " + err.message);
+            // 3. Replace track in Sender (Seamless Switch)
+            if (pc) {
+                const videoTrack = newStream.getVideoTracks()[0];
+                const audioTrack = newStream.getAudioTracks()[0];
+
+                const senders = pc.getSenders();
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+
+                if (videoSender && videoTrack) await videoSender.replaceTrack(videoTrack);
+                if (audioSender && audioTrack) await audioSender.replaceTrack(audioTrack);
+            }
+
+            // Restore Mute/Video Off state
+            if (this.isMuted && newStream.getAudioTracks()[0]) newStream.getAudioTracks()[0].enabled = false;
+            if (this.isCameraOff && newStream.getVideoTracks()[0]) newStream.getVideoTracks()[0].enabled = false;
+
+        } catch (err) {
+            console.error("Camera switch failed", err);
+            alert("Gagal ganti kamera: " + err.message);
+        }
     }
-}
 };
 
 // Hook up listener for tracks
