@@ -9,7 +9,7 @@
 
 const vizState = {
     currentStep: 0,
-    totalSteps: 5, // Removed security step (no code reference)
+    totalSteps: 6, // Added Video Call step
     animationTimers: []
 };
 
@@ -112,6 +112,26 @@ sendFn({
   fileId: fileId,
   chunkIndex: chunkIndex,
   data: chunk // ArrayBuffer 64KB
+});`
+    },
+    {
+        id: 'video-call',
+        title: 'Video Call (Media Stream)',
+        subtitle: 'Media (Kamera/Mic) dikirim via jalur WebRTC terpisah yang dinegosiasikan oleh PeerJS.',
+        details: {
+            title: '🔧 PeerJS MediaConnection',
+            items: [
+                'PeerJS membuat koneksi media terpisah (MediaConnection)',
+                'Stream Audio/Video ditransmisikan secara real-time via UDP',
+                'Koneksi data & video berjalan paralel'
+            ]
+        },
+        code: `// Dari video-call.js
+const call = peer.call(remoteId, stream);
+
+call.on('stream', (remoteStream) => {
+  // Tampilkan video teman
+  videoEl.srcObject = remoteStream;
 });`
     }
 ];
@@ -272,6 +292,9 @@ function renderAnimation(stepId) {
             break;
         case 'file-transfer':
             renderFileTransferAnimation(canvas);
+            break;
+        case 'video-call':
+            renderVideoCallAnimation(canvas);
             break;
     }
 }
@@ -584,5 +607,67 @@ function showTooltip(element, text) {
 
     document.body.appendChild(tooltip);
 
+
     setTimeout(() => tooltip.remove(), 3000);
+}
+
+function renderVideoCallAnimation(canvas) {
+    canvas.innerHTML = `
+        <div style="width: 100%; height: 100%; position: relative;">
+            <!-- Device A -->
+            <div style="position: absolute; left: 15%; top: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <div class="device active">
+                    <div class="device-screen">🎥</div>
+                    <div class="device-label">Caller</div>
+                </div>
+            </div>
+            
+            <!-- Device B -->
+            <div style="position: absolute; right: 15%; top: 50%; transform: translate(50%, -50%); text-align: center;">
+                <div class="device active">
+                    <div class="device-screen">📱</div>
+                    <div class="device-label">Answerer</div>
+                </div>
+            </div>
+
+            <!-- Existing Data Pipe (Background) -->
+            <div style="position: absolute; left: 25%; right: 25%; top: 60%; height: 2px; background: var(--viz-muted); opacity: 0.3;">
+                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: var(--viz-muted);">Data Channel</div>
+            </div>
+
+            <!-- Video Pipe (Foreground) -->
+            <div id="video-pipe" style="position: absolute; left: 25%; right: 25%; top: 40%; height: 6px; background: #ef4444; transform: scaleX(0); transform-origin: left; opacity: 0; border-radius: 3px; box-shadow: 0 0 10px #ef4444;">
+                <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: #ef4444; font-weight: bold;">Media Stream</div>
+            </div>
+
+            <!-- Camera Icons Flowing -->
+            <div id="stream-flow" style="position: absolute; width: 100%; height: 100%; pointer-events: none;"></div>
+        </div>
+    `;
+
+    // 1. Establish Media Pipe
+    scheduleAnimation(() => {
+        const pipe = document.getElementById('video-pipe');
+        pipe.style.transition = 'transform 1s ease-out, opacity 0.5s';
+        pipe.style.opacity = '1';
+        pipe.style.transform = 'scaleX(1)';
+    }, 500);
+
+    // 2. Stream Flow
+    for (let i = 0; i < 5; i++) {
+        scheduleAnimation(() => {
+            const flow = document.createElement('div');
+            flow.textContent = '📷';
+            flow.style.cssText = `
+                position: absolute;
+                left: 20%;
+                top: 38%;
+                font-size: 1.2rem;
+                animation: flyRight 1.5s linear forwards;
+            `;
+            document.getElementById('stream-flow').appendChild(flow);
+
+            setTimeout(() => flow.remove(), 1500);
+        }, 1500 + (i * 600));
+    }
 }

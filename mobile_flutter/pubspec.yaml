@@ -1,0 +1,41 @@
+name: kirim_data
+description: Transfer file P2P langsung antar perangkat via WebRTC. Cepat, aman, tanpa server.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # WebRTC for P2P connections
+  flutter_webrtc: ^0.12.4
+  
+  # State management
+  provider: ^6.1.2
+  
+  # File handling
+  file_picker: ^8.1.2
+  path_provider: ^2.1.4
+  share_plus: ^10.0.2
+  open_file: ^3.5.7
+  
+  # Permissions
+  permission_handler: ^11.3.1
+  
+  # UI Components
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.2.1
+  
+  # Utilities
+  uuid: ^4.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

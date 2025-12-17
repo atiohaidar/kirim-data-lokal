@@ -9,7 +9,7 @@
 
 const vizState = {
     currentStep: 0,
-    totalSteps: 6,
+    totalSteps: 7, // Added Video Call step
     animationTimers: []
 };
 
@@ -108,6 +108,29 @@ await pc.setLocalDescription(answer);
                 'Latency minimal karena tidak ada rute memutar ke server cloud.'
             ]
         }
+    },
+    {
+        id: 'video-renegotiation',
+        title: '6. Video Call (In-Band)',
+        subtitle: 'Menambahkan Video ke koneksi yang sudah ada (Renegotiation) lewat Data Channel.',
+        details: {
+            title: '✨ WebRTC Renegotiation',
+            items: [
+                'Untuk Video Call, kita tidak membuat koneksi baru.',
+                'Kita "menambahkan track" (pc.addTrack) ke koneksi yang sudah jalan.',
+                'Signaling Offer/Answer baru dikirim LEWAT Data Channel yang sudah aktif (In-Band).',
+                'Jauh lebih cepat karena tidak perlu copy-paste manual lagi!'
+            ]
+        },
+        code: `// native-video.js
+// 1. Kirim sinyal video via Data Channel
+dc.send(JSON.stringify({ 
+  type: 'video-offer', 
+  sdp: offer 
+}));
+
+// 2. Penerima otomatis setuju
+await pc.setRemoteDescription(offer);`
     }
 ];
 
@@ -217,7 +240,9 @@ function renderAnimation(stepId) {
         case 'exchange-offer': renderExchange(canvas, 'offer'); break;
         case 'generate-answer': renderGenerateAnswer(canvas); break;
         case 'exchange-answer': renderExchange(canvas, 'answer'); break;
+        case 'exchange-answer': renderExchange(canvas, 'answer'); break;
         case 'connection': renderConnection(canvas); break;
+        case 'video-renegotiation': renderVideoRenegotiation(canvas); break;
     }
 }
 
