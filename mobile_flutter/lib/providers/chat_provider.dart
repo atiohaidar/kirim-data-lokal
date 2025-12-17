@@ -26,8 +26,10 @@ class ChatProvider extends ChangeNotifier {
   StreamSubscription? _completeSubscription;
 
   List<ChatMessage> get messages => List.unmodifiable(_messages);
+  String? get savePath => _savePath;
 
-  void init(WebRTCService webrtcService) {
+  /// Initialize with WebRTC service and optional custom save path
+  void init(WebRTCService webrtcService, {String? customSavePath}) {
     // Prevent duplicate initialization
     if (_initialized && _webrtcService == webrtcService) return;
 
@@ -55,7 +57,7 @@ class ChatProvider extends ChangeNotifier {
 
     // Initialize save path (skip for web)
     if (!kIsWeb) {
-      _initSavePath();
+      _initSavePath(customSavePath);
     }
 
     // Add system message only on first init
@@ -65,7 +67,24 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _initSavePath() async {
+  /// Set save path (can be called externally to update)
+  void setSavePath(String? path) {
+    if (path != null && path.isNotEmpty) {
+      _savePath = path;
+    }
+  }
+
+  Future<void> _initSavePath(String? customPath) async {
+    if (customPath != null && customPath.isNotEmpty) {
+      _savePath = customPath;
+      try {
+        await Directory(_savePath!).create(recursive: true);
+      } catch (e) {
+        debugPrint('Error creating save directory: $e');
+      }
+      return;
+    }
+
     try {
       final dir = await getApplicationDocumentsDirectory();
       _savePath = '${dir.path}/KirimData';

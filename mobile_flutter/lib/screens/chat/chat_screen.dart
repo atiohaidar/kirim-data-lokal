@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../config/theme.dart';
 import '../../providers/connection_provider.dart';
 import '../../providers/chat_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../widgets/message_bubble.dart';
 import '../../widgets/stats_panel.dart';
 import '../home_screen.dart';
@@ -25,11 +26,16 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize chat provider with WebRTC service
+    // Initialize chat provider with WebRTC service and settings
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final connProvider = context.read<ConnectionProvider>();
       final chatProvider = context.read<ChatProvider>();
-      chatProvider.init(connProvider.webrtcService);
+      final settingsProvider = context.read<SettingsProvider>();
+
+      chatProvider.init(
+        connProvider.webrtcService,
+        customSavePath: settingsProvider.currentSavePath,
+      );
     });
   }
 
