@@ -264,8 +264,9 @@ function handleDataChannelMessage(e) {
                 handleIncomingFileChunk(msg, 'msgs');
 
             } else if (msg.type && msg.type.startsWith('video-')) {
-                // Video Signaling
+                // Video Signaling - don't display in chat
                 NativeVideo.handleSignal(msg);
+                return;
 
             } else {
                 // Parsed as JSON but unknown type, likely chat?

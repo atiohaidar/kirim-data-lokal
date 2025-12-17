@@ -20,13 +20,26 @@ class WebRTCService {
   final _messageController = StreamController<dynamic>.broadcast();
   final _sdpController = StreamController<String>.broadcast();
 
+  // Video call support
+  final _videoSignalController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  final _remoteStreamController = StreamController<MediaStream>.broadcast();
+
   Stream<ConnectionState> get onStateChange => _stateController.stream;
   Stream<dynamic> get onMessage => _messageController.stream;
   Stream<String> get onLocalSdp => _sdpController.stream;
 
+  // Video call streams
+  Stream<Map<String, dynamic>> get onVideoSignal =>
+      _videoSignalController.stream;
+  Stream<MediaStream> get onRemoteStream => _remoteStreamController.stream;
+
   ConnectionState get state => _state;
   ConnectionRole? get role => _role;
   bool get isConnected => _state == ConnectionState.connected;
+
+  // Expose peer connection for video renegotiation
+  RTCPeerConnection? get peerConnection => _peerConnection;
 
   void _setState(ConnectionState newState) {
     if (_disposed || _stateController.isClosed) return;
@@ -119,6 +132,14 @@ class WebRTCService {
         _setState(ConnectionState.disconnected);
       }
     };
+
+    // Handle incoming video tracks for renegotiation
+    _peerConnection!.onTrack = (event) {
+      if (_disposed) return;
+      if (event.streams.isNotEmpty) {
+        _remoteStreamController.add(event.streams[0]);
+      }
+    };
   }
 
   Future<void> _waitForIceGathering() async {
@@ -142,6 +163,14 @@ class WebRTCService {
     );
   }
 
+  // Video signal types for filtering
+  static const _videoSignalTypes = [
+    'video-offer',
+    'video-answer',
+    'video-end',
+    'video-reject',
+  ];
+
   void _setupDataChannel(RTCDataChannel channel) {
     channel.onDataChannelState = (state) {
       if (_disposed) return;
@@ -157,6 +186,20 @@ class WebRTCService {
       if (message.isBinary) {
         _messageController.add(message.binary);
       } else {
+        // Check if it's a video signal
+        try {
+          final json = jsonDecode(message.text);
+          if (json is Map<String, dynamic> &&
+              _videoSignalTypes.contains(json['type'])) {
+            // Route to video signal controller
+            if (!_videoSignalController.isClosed) {
+              _videoSignalController.add(json);
+            }
+            return;
+          }
+        } catch (_) {
+          // Not JSON or not a video signal, treat as regular message
+        }
         _messageController.add(message.text);
       }
     };
@@ -197,5 +240,7 @@ class WebRTCService {
     await _stateController.close();
     await _messageController.close();
     await _sdpController.close();
+    await _videoSignalController.close();
+    await _remoteStreamController.close();
   }
 }

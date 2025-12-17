@@ -95,13 +95,27 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  // Video signal types that should not be displayed in chat
+  static const _videoSignalTypes = [
+    'video-offer',
+    'video-answer',
+    'video-end',
+    'video-reject',
+  ];
+
   void _handleIncomingMessage(dynamic data) {
     if (data is String) {
       try {
         final json = jsonDecode(data);
-        if (json['type'] == 'file-meta') {
+        final type = json['type'];
+
+        if (type == 'file-meta') {
           _fileService.handleFileMeta(json);
           _addFileReceivingMessage(json);
+        } else if (_videoSignalTypes.contains(type)) {
+          // Video signals are handled by chat_screen via onVideoSignal stream
+          // Don't display them as chat messages
+          return;
         } else {
           // Regular text message
           _addPeerMessage(data);

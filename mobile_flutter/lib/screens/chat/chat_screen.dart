@@ -1,14 +1,19 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../../config/theme.dart';
 import '../../providers/connection_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/message_bubble.dart';
 import '../../widgets/stats_panel.dart';
+import '../../widgets/incoming_call_dialog.dart';
+import '../../services/video_call_service.dart';
+import '../video/video_call_screen.dart';
 import '../home_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -23,6 +28,10 @@ class _ChatScreenState extends State<ChatScreen> {
   final _scrollController = ScrollController();
   bool _showStats = false;
 
+  // Video call
+  VideoCallService? _videoCallService;
+  bool _isInVideoCall = false;
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +45,121 @@ class _ChatScreenState extends State<ChatScreen> {
         connProvider.webrtcService,
         customSavePath: settingsProvider.currentSavePath,
       );
+
+      // Listen for video signals from data channel
+      connProvider.webrtcService.onVideoSignal.listen(_handleVideoSignal);
+
+      // Listen for remote video streams
+      connProvider.webrtcService.onRemoteStream.listen((stream) {
+        if (_videoCallService != null) {
+          _videoCallService!.setRemoteStream(stream);
+        }
+      });
     });
+  }
+
+  void _handleVideoSignal(Map<String, dynamic> signal) async {
+    final type = signal['type'];
+    final connProvider = context.read<ConnectionProvider>();
+    final pc = connProvider.webrtcService.peerConnection;
+    if (pc == null) return;
+
+    if (type == 'video-offer') {
+      // Incoming call
+      final sdpData = signal['sdp'];
+      final offer = RTCSessionDescription(sdpData['sdp'], sdpData['type']);
+
+      // Show incoming call dialog
+      final accepted = await showIncomingCallDialog(context, callerId: 'Teman');
+
+      if (accepted == true) {
+        _videoCallService = VideoCallService();
+        final answer = await _videoCallService!.acceptCall(pc, offer);
+
+        if (answer != null) {
+          // Send answer via data channel
+          connProvider.webrtcService.sendJson({
+            'type': 'video-answer',
+            'sdp': {'sdp': answer.sdp, 'type': answer.type},
+          });
+
+          _showVideoCallScreen();
+        }
+      } else {
+        // Send rejection
+        connProvider.webrtcService.sendJson({'type': 'video-reject'});
+      }
+    } else if (type == 'video-answer') {
+      // Remote accepted our call
+      final sdpData = signal['sdp'];
+      final answer = RTCSessionDescription(sdpData['sdp'], sdpData['type']);
+
+      if (_videoCallService != null) {
+        await _videoCallService!.handleRemoteAnswer(pc, answer);
+      }
+    } else if (type == 'video-end') {
+      // Remote ended call
+      if (_videoCallService != null) {
+        await _videoCallService!.endCall();
+        _videoCallService = null;
+        setState(() => _isInVideoCall = false);
+      }
+    }
+  }
+
+  Future<void> _startVideoCall() async {
+    final connProvider = context.read<ConnectionProvider>();
+    final pc = connProvider.webrtcService.peerConnection;
+
+    if (pc == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Belum terhubung!')),
+      );
+      return;
+    }
+
+    try {
+      _videoCallService = VideoCallService();
+      final offer = await _videoCallService!.startCall(pc);
+
+      if (offer != null) {
+        // Send offer via data channel
+        connProvider.webrtcService.sendJson({
+          'type': 'video-offer',
+          'sdp': {'sdp': offer.sdp, 'type': offer.type},
+        });
+
+        _showVideoCallScreen();
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memulai video: $e')),
+      );
+    }
+  }
+
+  void _showVideoCallScreen() {
+    if (_videoCallService == null) return;
+
+    setState(() => _isInVideoCall = true);
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => VideoCallScreen(
+          videoService: _videoCallService!,
+          onEndCall: () async {
+            // Send end signal
+            final connProvider = context.read<ConnectionProvider>();
+            connProvider.webrtcService.sendJson({'type': 'video-end'});
+
+            await _videoCallService?.endCall();
+            _videoCallService = null;
+            setState(() => _isInVideoCall = false);
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -169,6 +292,12 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         actions: [
+          // Video call button
+          IconButton(
+            icon: const Icon(Icons.videocam),
+            onPressed: _isInVideoCall ? null : _startVideoCall,
+            tooltip: 'Video Call',
+          ),
           IconButton(
             icon: Icon(_showStats ? Icons.bar_chart : Icons.bar_chart_outlined),
             onPressed: () => setState(() => _showStats = !_showStats),
